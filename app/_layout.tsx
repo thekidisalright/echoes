@@ -28,6 +28,10 @@ export default function RootLayout() {
   return (
     <Stack>
       <Stack.Screen name="index" options={{ headerShown: false }} />
+      <Stack.Screen
+        name="player-screen"
+        options={{ animation: "slide_from_bottom", headerShown: false }}
+      />
     </Stack>
   );
 }
