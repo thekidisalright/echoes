@@ -1,10 +1,46 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Slider } from "@miblanchard/react-native-slider";
+import {
+  setAudioModeAsync,
+  useAudioPlayer,
+  useAudioPlayerStatus,
+} from "expo-audio";
 import { Link } from "expo-router";
+import { useEffect } from "react";
 import { Image, StatusBar, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
+const audioSource = require("../assets/test/dualipa_troye.mp3");
+
+const formatTime = (timeInSeconds: number) => {
+  if (!timeInSeconds || isNaN(timeInSeconds)) return "00:00";
+
+  const totalSeconds = Math.floor(timeInSeconds);
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+
+  return `${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
+};
 
 export default function PlayerScreen() {
+  const player = useAudioPlayer(audioSource);
+  const audioStatus = useAudioPlayerStatus(player);
+
+  useEffect(() => {
+    setAudioModeAsync({
+      playsInSilentMode: true,
+      shouldPlayInBackground: true,
+      interruptionMode: "doNotMix",
+    });
+  }, []);
+
+  const togglePlayPause = () => {
+    if (audioStatus.playing) {
+      player.pause();
+    } else {
+      player.play();
+    }
+  };
+
   return (
     <SafeAreaProvider>
       <StatusBar barStyle={"light-content"} />
@@ -47,8 +83,8 @@ export default function PlayerScreen() {
           <View className="w-full px-4">
             <Slider
               minimumValue={0}
-              maximumValue={100}
-              value={30}
+              maximumValue={audioStatus.duration}
+              value={audioStatus.currentTime}
               minimumTrackTintColor="#D4A017"
               maximumTrackTintColor="#d4d4d4"
               thumbTintColor="#D4A017"
@@ -56,16 +92,24 @@ export default function PlayerScreen() {
               thumbStyle={{ width: 16, height: 16, borderRadius: 8 }}
             />
             <View className="flex-row justify-between">
-              <Text className="text-xs text-neutral-400 font-light">01:30</Text>
               <Text className="text-xs text-neutral-400 font-light">
-                -04:15
+                {formatTime(audioStatus.currentTime)}
+              </Text>
+              <Text className="text-xs text-neutral-400 font-light">
+                -{formatTime(audioStatus.duration - audioStatus.currentTime)}
               </Text>
             </View>
           </View>
           <View className="flex-row items-center justify-center gap-8 px-4">
             <Ionicons name="play-skip-back" size={22} color={"#fafafa"} />
             <Ionicons name="play-back" size={32} color={"#fafafa"} />
-            <Ionicons name="play-circle" size={72} color={"#fafafa"} />
+            <TouchableOpacity onPress={togglePlayPause}>
+              <Ionicons
+                name={audioStatus.playing ? "pause-circle" : "play-circle"}
+                size={72}
+                color={"#fafafa"}
+              />
+            </TouchableOpacity>
             <Ionicons name="play-forward" size={32} color={"#fafafa"} />
             <Ionicons name="play-skip-forward" size={22} color={"#fafafa"} />
           </View>
