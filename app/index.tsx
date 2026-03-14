@@ -8,12 +8,7 @@ export default function Index() {
       <SafeAreaView className="flex-1 bg-neutral-900">
         <View className="flex-1 bg-neutral-900 p-4">
           <Link href={{ pathname: "/player-screen" }}>
-            <Text
-              style={{ fontFamily: "Roboto_700Bold" }}
-              className="text-white text-4xl"
-            >
-              Echoes
-            </Text>
+            <Text className="text-white text-4xl">Echoes</Text>
           </Link>
         </View>
       </SafeAreaView>
