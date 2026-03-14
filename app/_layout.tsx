@@ -27,10 +27,27 @@ export default function RootLayout() {
   }
   return (
     <Stack>
-      <Stack.Screen name="index" options={{ headerShown: false }} />
+      <Stack.Screen
+        name="index"
+        options={{ headerShown: false, title: "Home" }}
+      />
       <Stack.Screen
         name="player-screen"
-        options={{ animation: "slide_from_bottom", headerShown: false }}
+        options={{
+          animation: "slide_from_bottom",
+          headerShown: false,
+          title: "Player",
+        }}
+      />
+      <Stack.Screen
+        name="chapters"
+        options={{
+          presentation: "formSheet",
+          sheetAllowedDetents: [0.5, 0.8],
+          sheetGrabberVisible: true,
+          title: "Chapters",
+          headerShown: true,
+        }}
       />
     </Stack>
   );
