@@ -12,22 +12,19 @@ const formatTime = (timeInSeconds: number) => {
   return `${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
 };
 
-interface Status {
+interface StatusType {
   duration: number;
   currentTime: number;
 }
-
-interface Player {
-  seekTo: Function;
+interface PlayerType {
+  seekTo: (time: number) => void;
+}
+interface ProgressBarProps {
+  player: PlayerType;
+  status: StatusType;
 }
 
-export default function ProgressBars({
-  player,
-  status,
-}: {
-  player: Player;
-  status: Status;
-}) {
+export default function ProgressBars({ player, status }: ProgressBarProps) {
   const [isSliding, setIsSliding] = useState(false);
   const [sliderValue, setSliderValue] = useState(0);
 
