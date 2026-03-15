@@ -19,12 +19,15 @@ interface StatusType {
 interface PlayerType {
   seekTo: (time: number) => void;
 }
-interface ProgressBarProps {
+interface SliderComponentProps {
   player: PlayerType;
   status: StatusType;
 }
 
-export default function ProgressBars({ player, status }: ProgressBarProps) {
+export default function SliderComponent({
+  player,
+  status,
+}: SliderComponentProps) {
   const [isSliding, setIsSliding] = useState(false);
   const [sliderValue, setSliderValue] = useState(0);
 

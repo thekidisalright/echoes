@@ -1,5 +1,5 @@
 import AudioControls from "@/components/AudioControls";
-import ProgressBars from "@/components/ProgressBar";
+import SliderComponent from "@/components/Slider";
 import { Ionicons } from "@expo/vector-icons";
 import {
   setAudioModeAsync,
@@ -63,7 +63,7 @@ export default function PlayerScreen() {
               Chapter 1 of 12
             </Text>
           </View>
-          <ProgressBars player={player} status={audioStatus} />
+          <SliderComponent player={player} status={audioStatus} />
           <AudioControls player={player} status={audioStatus} />
           {/* Removemos o justify-between do pai */}
           <View className="mt-10 mb-2 px-2 flex-row">
