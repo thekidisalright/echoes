@@ -1,3 +1,4 @@
+import AudioControls from "@/components/AudioControls";
 import ProgressBars from "@/components/ProgressBar";
 import { Ionicons } from "@expo/vector-icons";
 import {
@@ -22,14 +23,6 @@ export default function PlayerScreen() {
       interruptionMode: "doNotMix",
     });
   }, []);
-
-  const togglePlayPause = () => {
-    if (audioStatus.playing) {
-      player.pause();
-    } else {
-      player.play();
-    }
-  };
 
   return (
     <SafeAreaProvider>
@@ -71,19 +64,7 @@ export default function PlayerScreen() {
             </Text>
           </View>
           <ProgressBars player={player} status={audioStatus} />
-          <View className="flex-row items-center justify-center gap-8 px-4">
-            <Ionicons name="play-skip-back" size={22} color={"#fafafa"} />
-            <Ionicons name="play-back" size={32} color={"#fafafa"} />
-            <TouchableOpacity onPress={togglePlayPause}>
-              <Ionicons
-                name={audioStatus.playing ? "pause-circle" : "play-circle"}
-                size={72}
-                color={"#fafafa"}
-              />
-            </TouchableOpacity>
-            <Ionicons name="play-forward" size={32} color={"#fafafa"} />
-            <Ionicons name="play-skip-forward" size={22} color={"#fafafa"} />
-          </View>
+          <AudioControls player={player} status={audioStatus} />
           {/* Removemos o justify-between do pai */}
           <View className="mt-10 mb-2 px-2 flex-row">
             {/* flex-1: divide igualmente. items-center: centraliza o ícone. py-2: deixa o botão mais "alto" */}
