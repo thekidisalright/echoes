@@ -31,7 +31,11 @@ export default function RootLayout() {
     <Stack>
       <Stack.Screen
         name="index"
-        options={{ headerShown: false, title: "Home" }}
+        options={{
+          headerShown: false,
+          title: "Home",
+          animation: "none",
+        }}
       />
       <Stack.Screen
         name="player-screen"
@@ -39,6 +43,8 @@ export default function RootLayout() {
           animation: "slide_from_bottom",
           headerShown: false,
           title: "Player",
+          presentation: "formSheet",
+          sheetAllowedDetents: [1],
         }}
       />
       <Stack.Screen

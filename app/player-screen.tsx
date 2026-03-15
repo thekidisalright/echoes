@@ -1,10 +1,29 @@
+import AudioControls from "@/components/AudioControls";
+import ProgressBars from "@/components/ProgressBar";
 import { Ionicons } from "@expo/vector-icons";
-import { Slider } from "@miblanchard/react-native-slider";
+import {
+  setAudioModeAsync,
+  useAudioPlayer,
+  useAudioPlayerStatus,
+} from "expo-audio";
 import { Link } from "expo-router";
+import { useEffect } from "react";
 import { Image, StatusBar, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
+const audioSource = require("../assets/test/dualipa_troye.mp3");
 
 export default function PlayerScreen() {
+  const player = useAudioPlayer(audioSource);
+  const audioStatus = useAudioPlayerStatus(player);
+
+  useEffect(() => {
+    setAudioModeAsync({
+      playsInSilentMode: true,
+      shouldPlayInBackground: true,
+      interruptionMode: "doNotMix",
+    });
+  }, []);
+
   return (
     <SafeAreaProvider>
       <StatusBar barStyle={"light-content"} />
@@ -44,38 +63,40 @@ export default function PlayerScreen() {
               Chapter 1 of 12
             </Text>
           </View>
-          <View className="w-full px-4">
-            <Slider
-              minimumValue={0}
-              maximumValue={100}
-              value={30}
-              minimumTrackTintColor="#D4A017"
-              maximumTrackTintColor="#d4d4d4"
-              thumbTintColor="#D4A017"
-              trackStyle={{ height: 5, borderRadius: 3 }}
-              thumbStyle={{ width: 16, height: 16, borderRadius: 8 }}
-            />
-            <View className="flex-row justify-between">
-              <Text className="text-xs text-neutral-400 font-light">01:30</Text>
-              <Text className="text-xs text-neutral-400 font-light">
-                -04:15
-              </Text>
-            </View>
-          </View>
-          <View className="flex-row items-center justify-center gap-8 px-4">
-            <Ionicons name="play-skip-back" size={22} color={"#fafafa"} />
-            <Ionicons name="play-back" size={32} color={"#fafafa"} />
-            <Ionicons name="play-circle" size={72} color={"#fafafa"} />
-            <Ionicons name="play-forward" size={32} color={"#fafafa"} />
-            <Ionicons name="play-skip-forward" size={22} color={"#fafafa"} />
-          </View>
-          <View className="mt-10 mb-4 px-4 flex-row justify-between">
-            <Ionicons name="volume-high-outline" size={24} color={"#fafafa"} />
-            <Ionicons name="time-outline" size={24} color={"#fafafa"} />
-            <Ionicons name="repeat-outline" size={24} color={"#fafafa"} />
-            <Ionicons name="moon-outline" size={24} color={"#fafafa"} />
-            <Ionicons name="bookmark" size={24} color={"#D4A017"} />
-            <Ionicons name="list-outline" size={24} color={"#fafafa"} />
+          <ProgressBars player={player} status={audioStatus} />
+          <AudioControls player={player} status={audioStatus} />
+          {/* Removemos o justify-between do pai */}
+          <View className="mt-10 mb-2 px-2 flex-row">
+            {/* flex-1: divide igualmente. items-center: centraliza o ícone. py-2: deixa o botão mais "alto" */}
+            <TouchableOpacity className="flex-1 items-center justify-center py-2">
+              <Ionicons
+                name="volume-high-outline"
+                size={24}
+                color={"#fafafa"}
+              />
+            </TouchableOpacity>
+
+            <TouchableOpacity className="flex-1 items-center justify-center py-2">
+              <Ionicons name="time-outline" size={24} color={"#fafafa"} />
+            </TouchableOpacity>
+
+            <TouchableOpacity className="flex-1 items-center justify-center py-2">
+              <Ionicons name="repeat-outline" size={24} color={"#fafafa"} />
+            </TouchableOpacity>
+
+            <TouchableOpacity className="flex-1 items-center justify-center py-2">
+              <Ionicons name="moon-outline" size={24} color={"#fafafa"} />
+            </TouchableOpacity>
+
+            <TouchableOpacity className="flex-1 items-center justify-center py-2">
+              <Ionicons name="bookmark" size={24} color={"#D4A017"} />
+            </TouchableOpacity>
+
+            <Link href={{ pathname: "/chapters" }} asChild>
+              <TouchableOpacity className="flex-1 items-center justify-center py-2">
+                <Ionicons name="list-outline" size={24} color={"#fafafa"} />
+              </TouchableOpacity>
+            </Link>
           </View>
         </View>
       </SafeAreaView>
