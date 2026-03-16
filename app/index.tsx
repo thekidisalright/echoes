@@ -12,7 +12,7 @@ export default function Index() {
   return (
     <SafeAreaProvider>
       <SafeAreaView className="flex-1 bg-neutral-800">
-        <View className="px-4 mt-4 mb-6 flex-row justify-between items-center">
+        <View className="px-4 mt-4 mb-5 flex-row justify-between items-center">
           <Link href={{ pathname: "/player-screen" }}>
             <Text className="text-white text-5xl font-cormorantbold">
               Echoes
@@ -26,7 +26,7 @@ export default function Index() {
           showsVerticalScrollIndicator={false}
         >
           <View className="px-4 mb-8">
-            <Text className="text-white text-xl font-medium mb-3">
+            <Text className="text-white text-xl font-medium mb-1">
               Continue Listening
             </Text>
             <ContinueListeningItem status="idle" />
@@ -37,11 +37,14 @@ export default function Index() {
               All Audiobooks
             </Text>
             <View className="flex-row flex-wrap justify-between">
-              <BookItem />
-              <BookItem />
-              <BookItem />
-              <BookItem />
-              <BookItem />
+              <BookItem
+                image={require("@/assets/images/thehourofthestar.jpg")}
+              />
+              <BookItem image={require("@/assets/images/amongflowers.jpg")} />
+              <BookItem image={require("@/assets/images/reputations.jpg")} />
+              <BookItem
+                image={require("@/assets/images/worstpersonever.jpg")}
+              />
             </View>
           </View>
         </ScrollView>

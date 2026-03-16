@@ -1,6 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Image, Text, View } from "react-native";
-import ProgressBar from "./ProgressBar";
 
 export default function MiniPlayer() {
   return (
@@ -11,13 +10,12 @@ export default function MiniPlayer() {
         resizeMode="cover"
       />
       <View className="flex-col flex-1 h-14 justify-center">
-        <Text className="text-white font-semibold" numberOfLines={1}>
+        <Text className="text-white text-sm font-semibold" numberOfLines={1}>
           The Hour of the Star
         </Text>
-        <Text className="text-neutral-400 text-sm mb-1" numberOfLines={1}>
+        <Text className="text-neutral-400 text-sm mb" numberOfLines={1}>
           Chapter 1
         </Text>
-        <ProgressBar duration={3000} currentTime={1550} />
       </View>
       <View className="w-14 flex-col items-center">
         <Ionicons name="play-circle" color={"#fafafa"} size={48} />

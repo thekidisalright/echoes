@@ -1,20 +1,20 @@
-import { MaterialIcons } from "@expo/vector-icons";
+import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { Image, Text, View } from "react-native";
 import ProgressBar from "./ProgressBar";
 
 export default function ContinueListeningItem({ status }: { status: string }) {
   return (
-    <View className="flex-row items-center h-[72px] gap-3">
+    <View className="flex-row items-center h-[80px] gap-3 border-b border-b-neutral-700">
       <Image
         source={require("@/assets/images/thehourofthestar.jpg")}
-        className="w-14 h-14 object-cover rounded"
+        className="w-16 h-16 object-cover rounded-md"
         resizeMode="cover"
       />
-      <View className="flex-col flex-1 h-14 justify-center">
-        <Text className="text-white font-semibold" numberOfLines={1}>
+      <View className="flex-col flex-1 h-14 justify-between">
+        <Text className="text-white text-sm font-semibold" numberOfLines={1}>
           The Hour of the Star
         </Text>
-        <Text className="text-white text-sm mb-1" numberOfLines={1}>
+        <Text className="text-neutral-400 text-sm mb-1" numberOfLines={1}>
           Clarice Lispector
         </Text>
         <ProgressBar duration={3000} currentTime={1550} />
@@ -27,7 +27,7 @@ export default function ContinueListeningItem({ status }: { status: string }) {
             size={18}
           />
         ) : (
-          <></>
+          <Ionicons name="time" color={"#a3a3a3"} size={18} />
         )}
       </View>
     </View>
