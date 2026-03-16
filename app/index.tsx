@@ -36,15 +36,32 @@ export default function Index() {
             <Text className="text-white text-xl font-medium mb-3">
               All Audiobooks
             </Text>
-            <View className="flex-row flex-wrap justify-between">
-              <BookItem
-                image={require("@/assets/images/thehourofthestar.jpg")}
-              />
-              <BookItem image={require("@/assets/images/amongflowers.jpg")} />
-              <BookItem image={require("@/assets/images/reputations.jpg")} />
-              <BookItem
-                image={require("@/assets/images/worstpersonever.jpg")}
-              />
+            <View
+              className={
+                books.length > 0
+                  ? "flex-row flex-wrap justify-between"
+                  : "flex-col justify-center items-center h-full gap-1"
+              }
+            >
+              {books.length > 0 ? (
+                books.map((book, index) => (
+                  <BookItem
+                    key={index}
+                    bookTitle={book.title}
+                    bookAuthor={book.author}
+                  />
+                ))
+              ) : (
+                <>
+                  <Text className="text-neutral-400 text-sm font-semibold">
+                    No files found
+                  </Text>
+                  <Text className="text-neutral-400 text-xs text-center">
+                    Please select a different folder or add files to the current
+                    one.
+                  </Text>
+                </>
+              )}
             </View>
           </View>
         </ScrollView>
