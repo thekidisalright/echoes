@@ -36,7 +36,7 @@ export default function ScanBooks({ setBooks }: any) {
   };
   return (
     <TouchableOpacity onPress={handlePickFolder}>
-      <Ionicons name="file-tray-stacked-outline" size={24} color={"#fafafa"} />
+      <Ionicons name="settings" size={24} color={"#a3a3a3"} />
     </TouchableOpacity>
   );
 }
