@@ -1,5 +1,6 @@
 import BookItem from "@/components/BookItem";
 import ContinueListeningItem from "@/components/ContinueListeningItem";
+import MiniPlayer from "@/components/MiniPlayer";
 import ScanBooks from "@/components/ScanBooks";
 import { Link } from "expo-router";
 import { useState } from "react";
@@ -13,7 +14,7 @@ export default function Index() {
       <SafeAreaView className="flex-1 bg-neutral-800">
         <View className="px-4 mt-4 mb-6 flex-row justify-between items-center">
           <Link href={{ pathname: "/player-screen" }}>
-            <Text className="text-white text-5xl font-cormorantbold pb-">
+            <Text className="text-white text-5xl font-cormorantbold">
               Echoes
             </Text>
           </Link>
@@ -21,7 +22,7 @@ export default function Index() {
         </View>
         <ScrollView
           className="flex-1"
-          contentContainerClassName="pb-52"
+          contentContainerClassName="pb-32"
           showsVerticalScrollIndicator={false}
         >
           <View className="px-4 mb-8">
@@ -44,6 +45,7 @@ export default function Index() {
             </View>
           </View>
         </ScrollView>
+        <MiniPlayer />
       </SafeAreaView>
     </SafeAreaProvider>
   );
