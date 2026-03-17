@@ -1,8 +1,14 @@
+import { BookType } from "@/types/AppTypes";
 import { Ionicons } from "@expo/vector-icons";
 import { Directory, File } from "expo-file-system";
+import { Dispatch, SetStateAction } from "react";
 import { TouchableOpacity } from "react-native";
 
-export default function ScanBooks({ setBooks }: any) {
+export default function ScanBooks({
+  setBooks,
+}: {
+  setBooks: Dispatch<SetStateAction<BookType[] | []>>;
+}) {
   const handlePickFolder = async () => {
     try {
       const pickedDirectory = await Directory.pickDirectoryAsync();

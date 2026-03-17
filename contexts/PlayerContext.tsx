@@ -14,11 +14,8 @@ import {
   useState,
 } from "react";
 
-export interface BookType {
-  title: string;
-  cover: string;
-  author: string;
-}
+import { BookType } from "@/types/AppTypes";
+
 interface PlayerContextType {
   currentBook: BookType | null;
   setCurrentBook: Dispatch<SetStateAction<BookType | null>>;
@@ -53,7 +50,7 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
   const value = {
     currentBook,
     setCurrentBook,
-    currentChapterIndex: null,
+    currentChapterIndex,
     player,
     status: playerStatus,
     setCurrentChapterIndex,
