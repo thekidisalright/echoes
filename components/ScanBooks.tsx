@@ -13,13 +13,30 @@ export default function ScanBooks() {
       const scanDirectory = (currentDir: any) => {
         const contents = currentDir.list();
         const audioFiles: any[] = [];
+        let coverImageUri: string | null = null;
 
         contents.forEach((item: any) => {
           if (item instanceof Directory) {
             scanDirectory(item);
           } else if (item instanceof File) {
-            if (item.name.endsWith(".mp3") || item.name.endsWith(".m4a")) {
-              audioFiles.push({ name: item.name, uri: item.uri });
+            if (item.name.endsWith(".mp3")) {
+              audioFiles.push({
+                name: item.name.split(".mp3", 1).join(""),
+                uri: item.uri,
+              });
+            } else if (item.name.endsWith(".m4a")) {
+              audioFiles.push({
+                name: item.name.split(".m4a", 1).join(""),
+                uri: item.uri,
+              });
+            } else if (
+              item.name.endsWith(".jpg") ||
+              item.name.endsWith(".jpeg") ||
+              item.name.endsWith(".png")
+            ) {
+              if (!coverImageUri) {
+                coverImageUri = item.uri;
+              }
             }
           }
         });
@@ -27,7 +44,8 @@ export default function ScanBooks() {
           booksFound.push({
             title: currentDir.name,
             chapters: audioFiles,
-            author: "Unknown",
+            author: "Unknown Author",
+            cover: coverImageUri,
           });
         }
       };

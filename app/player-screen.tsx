@@ -50,13 +50,16 @@ export default function PlayerScreen() {
               {currentBook?.title}
             </Text>
             <Text className="text-white text-lg">
-              Chapter {currentChapterIndex ? currentChapterIndex + 1 : "?"}
+              {currentBook && currentChapterIndex != null
+                ? currentBook.chapters[currentChapterIndex].name
+                : "Unknow chapter"}
             </Text>
             <Text
               className="text-neutral-300 text-sm font-light"
               numberOfLines={1}
             >
-              Chapter {currentChapterIndex ? currentChapterIndex + 1 : "?"} of{" "}
+              Chapter{" "}
+              {currentChapterIndex != null ? currentChapterIndex + 1 : "?"} of{" "}
               {currentBook?.chapters.length}
             </Text>
           </View>

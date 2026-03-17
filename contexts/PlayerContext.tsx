@@ -36,7 +36,7 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
 
   const [currentBook, setCurrentBook] = useState<BookType | null>(null);
   const [currentChapterIndex, setCurrentChapterIndex] = useState<number | null>(
-    null,
+    0,
   );
 
   useEffect(() => {
