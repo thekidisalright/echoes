@@ -1,3 +1,4 @@
+import { usePlayerContext } from "@/contexts/PlayerContext";
 import { Slider } from "@miblanchard/react-native-slider";
 import { useEffect, useState } from "react";
 import { Text, View } from "react-native";
@@ -12,22 +13,8 @@ const formatTime = (timeInSeconds: number) => {
   return `${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
 };
 
-interface StatusType {
-  duration: number;
-  currentTime: number;
-}
-interface PlayerType {
-  seekTo: (time: number) => void;
-}
-interface SliderComponentProps {
-  player: PlayerType;
-  status: StatusType;
-}
-
-export default function SliderComponent({
-  player,
-  status,
-}: SliderComponentProps) {
+export default function SliderComponent() {
+  const { player, status } = usePlayerContext();
   const [isSliding, setIsSliding] = useState(false);
   const [sliderValue, setSliderValue] = useState(0);
 

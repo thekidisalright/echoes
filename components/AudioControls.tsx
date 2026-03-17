@@ -1,23 +1,9 @@
+import { usePlayerContext } from "@/contexts/PlayerContext";
 import { Ionicons } from "@expo/vector-icons";
 import { TouchableOpacity, View } from "react-native";
 
-interface PlayerType {
-  pause: () => void;
-  play: () => void;
-  seekTo: (time: number) => void;
-}
-interface StatusType {
-  playing: boolean;
-  currentTime: number;
-  duration: number;
-}
-
-interface AudioControlsProps {
-  player: PlayerType;
-  status: StatusType;
-}
-
-export default function AudioControls({ player, status }: AudioControlsProps) {
+export default function AudioControls() {
+  const { player, status } = usePlayerContext();
   const togglePlayPause = () => {
     if (status.playing) {
       player.pause();

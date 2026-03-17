@@ -2,15 +2,10 @@ import BookItem from "@/components/BookItem";
 import ContinueListeningItem from "@/components/ContinueListeningItem";
 import MiniPlayer from "@/components/MiniPlayer";
 import ScanBooks from "@/components/ScanBooks";
+import { BookType } from "@/contexts/PlayerContext";
 import { useState } from "react";
 import { ScrollView, Text, View } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
-
-export interface BookType {
-  title: string;
-  cover: string;
-  author: string;
-}
 
 export default function Index() {
   const [books, setBooks] = useState<BookType[]>([]);

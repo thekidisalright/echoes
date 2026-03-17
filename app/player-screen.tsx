@@ -1,29 +1,13 @@
 import AudioControls from "@/components/AudioControls";
 import SliderComponent from "@/components/Slider";
+import { usePlayerContext } from "@/contexts/PlayerContext";
 import { Ionicons } from "@expo/vector-icons";
-import {
-  setAudioModeAsync,
-  useAudioPlayer,
-  useAudioPlayerStatus,
-} from "expo-audio";
 import { Link } from "expo-router";
-import { useEffect } from "react";
 import { Image, StatusBar, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
-const audioSource = require("../assets/test/dualipa_troye.mp3");
 
 export default function PlayerScreen() {
-  const player = useAudioPlayer(audioSource);
-  const audioStatus = useAudioPlayerStatus(player);
-
-  useEffect(() => {
-    setAudioModeAsync({
-      playsInSilentMode: true,
-      shouldPlayInBackground: true,
-      interruptionMode: "doNotMix",
-    });
-  }, []);
-
+  const player = usePlayerContext();
   return (
     <SafeAreaProvider>
       <StatusBar barStyle={"light-content"} />
@@ -63,8 +47,8 @@ export default function PlayerScreen() {
               Chapter 1 of 12
             </Text>
           </View>
-          <SliderComponent player={player} status={audioStatus} />
-          <AudioControls player={player} status={audioStatus} />
+          <SliderComponent />
+          <AudioControls />
           <View className="mt-10 mb-2 px-2 flex-row">
             <TouchableOpacity className="flex-1 items-center justify-center py-2">
               <Ionicons
