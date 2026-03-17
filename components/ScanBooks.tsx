@@ -1,14 +1,10 @@
-import { BookType } from "@/types/AppTypes";
+import { useLibraryContext } from "@/contexts/LibraryContext";
 import { Ionicons } from "@expo/vector-icons";
 import { Directory, File } from "expo-file-system";
-import { Dispatch, SetStateAction } from "react";
 import { TouchableOpacity } from "react-native";
 
-export default function ScanBooks({
-  setBooks,
-}: {
-  setBooks: Dispatch<SetStateAction<BookType[] | []>>;
-}) {
+export default function ScanBooks() {
+  const { saveBooksToLibrary } = useLibraryContext();
   const handlePickFolder = async () => {
     try {
       const pickedDirectory = await Directory.pickDirectoryAsync();
@@ -35,7 +31,7 @@ export default function ScanBooks({
         }
       };
       scanDirectory(pickedDirectory);
-      setBooks(booksFound);
+      saveBooksToLibrary(booksFound);
     } catch (error) {
       console.error("Error while trying to scan for books:", error);
     }
