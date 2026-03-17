@@ -44,13 +44,7 @@ export default function Index() {
               }
             >
               {books.length > 0 ? (
-                books.map((book, index) => (
-                  <BookItem
-                    key={index}
-                    bookTitle={book.title}
-                    bookAuthor={book.author}
-                  />
-                ))
+                books.map((book, index) => <BookItem key={index} book={book} />)
               ) : (
                 <>
                   <Text className="text-neutral-400 text-sm font-semibold">
