@@ -6,8 +6,14 @@ import { useState } from "react";
 import { ScrollView, Text, View } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 
+export interface BookType {
+  title: string;
+  cover: string;
+  author: string;
+}
+
 export default function Index() {
-  const [books, setBooks] = useState([]);
+  const [books, setBooks] = useState<BookType[]>([]);
   return (
     <SafeAreaProvider>
       <SafeAreaView className="flex-1 bg-neutral-800">

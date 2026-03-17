@@ -1,12 +1,7 @@
+import { BookType } from "@/app";
 import { Ionicons } from "@expo/vector-icons";
 import { Link } from "expo-router";
 import { Image, Text, TouchableOpacity, View } from "react-native";
-
-interface BookType {
-  title: string;
-  cover: string;
-  author: string;
-}
 
 export default function BookItem({ book }: { book: BookType }) {
   const handleLongPress = () => {

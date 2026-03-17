@@ -65,9 +65,7 @@ export default function PlayerScreen() {
           </View>
           <SliderComponent player={player} status={audioStatus} />
           <AudioControls player={player} status={audioStatus} />
-          {/* Removemos o justify-between do pai */}
           <View className="mt-10 mb-2 px-2 flex-row">
-            {/* flex-1: divide igualmente. items-center: centraliza o ícone. py-2: deixa o botão mais "alto" */}
             <TouchableOpacity className="flex-1 items-center justify-center py-2">
               <Ionicons
                 name="volume-high-outline"
