@@ -27,6 +27,7 @@ export default function ScanBooks() {
           booksFound.push({
             title: currentDir.name,
             chapters: audioFiles,
+            author: "Unknown",
           });
         }
       };
