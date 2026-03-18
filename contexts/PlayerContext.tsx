@@ -30,14 +30,11 @@ export const PlayerContext = createContext<PlayerContextType | undefined>(
 );
 
 export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
-  const audioSource = require("../assets/test/dualipa_troye.mp3");
+  const [currentBook, setCurrentBook] = useState<BookType | null>(null);
+  const [currentChapterIndex, setCurrentChapterIndex] = useState<number>(0);
+  const audioSource = currentBook?.chapters[currentChapterIndex].uri;
   const player = useAudioPlayer(audioSource, { updateInterval: 200 });
   const playerStatus = useAudioPlayerStatus(player);
-
-  const [currentBook, setCurrentBook] = useState<BookType | null>(null);
-  const [currentChapterIndex, setCurrentChapterIndex] = useState<number | null>(
-    0,
-  );
 
   useEffect(() => {
     setAudioModeAsync({
