@@ -5,9 +5,12 @@ import { useRouter } from "expo-router";
 import { Image, Text, TouchableOpacity, View } from "react-native";
 
 export default function BookItem({ book }: { book: BookType }) {
-  const { setCurrentBook } = usePlayerContext();
+  const { setCurrentBook, status, player } = usePlayerContext();
   const router = useRouter();
   const handlePress = () => {
+    if (status.playing) {
+      player.pause();
+    }
     setCurrentBook(book);
     router.push("/player-screen");
   };
