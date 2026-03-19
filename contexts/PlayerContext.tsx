@@ -1,3 +1,5 @@
+import { BookType } from "@/types/AppTypes";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   AudioPlayer,
   AudioStatus,
@@ -14,8 +16,8 @@ import {
   useRef,
   useState,
 } from "react";
-
-import { BookType } from "@/types/AppTypes";
+import { AppState } from "react-native";
+import { useLibraryContext } from "./LibraryContext";
 
 interface PlayerContextType {
   currentBook: BookType | null;
@@ -35,6 +37,9 @@ export const PlayerContext = createContext<PlayerContextType | undefined>(
 );
 
 export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
+  const hasLoadedInitialBook = useRef(false);
+  const { updateBook, books } = useLibraryContext();
+  const pendingSeekTime = useRef<number | null>(null);
   useEffect(() => {
     setAudioModeAsync({
       playsInSilentMode: true,
@@ -65,6 +70,41 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   useEffect(() => {
+    const isReadyToSeek = playerStatus && playerStatus.duration > 0;
+    if (
+      pendingSeekTime.current !== null &&
+      pendingSeekTime.current > 0 &&
+      isReadyToSeek
+    ) {
+      player.seekTo(pendingSeekTime.current);
+      pendingSeekTime.current = null;
+    }
+  }, [playerStatus.duration, player]);
+
+  useEffect(() => {
+    const bootPlayer = async () => {
+      if (books.length > 0 && !hasLoadedInitialBook.current) {
+        try {
+          const lastBook = await AsyncStorage.getItem("@lastPlayed");
+          if (lastBook) {
+            const foundBook = books.find((b) => b.id === lastBook);
+            if (foundBook) {
+              setCurrentBook(foundBook);
+              setCurrentChapterIndex(foundBook.savedChapterIndex || 0);
+              pendingSeekTime.current = foundBook.savedPosition || 0;
+            }
+          }
+          hasLoadedInitialBook.current = true;
+        } catch (error) {
+          console.error("Error while initializing player : ", error);
+        }
+      }
+    };
+
+    bootPlayer();
+  }, [books]);
+
+  useEffect(() => {
     if (playerStatus.didJustFinish && currentBook) {
       forward();
     }
@@ -82,6 +122,27 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
       }
     }
   }, [currentChapterIndex, currentBook]);
+
+  const saveProgress = async () => {
+    if (currentBook && player) {
+      const currentPosition = player.currentTime;
+      await updateBook(currentBook.id, {
+        savedChapterIndex: currentChapterIndex,
+        savedPosition: currentPosition,
+      });
+      await AsyncStorage.setItem("@lastPlayed", currentBook.id);
+    }
+  };
+
+  useEffect(() => {
+    const subscription = AppState.addEventListener("change", (nextAppState) => {
+      if (nextAppState === "background" || nextAppState === "inactive") {
+        saveProgress();
+      }
+    });
+
+    return () => subscription.remove();
+  }, [currentBook, currentChapterIndex, player]);
 
   const value = {
     currentBook,
