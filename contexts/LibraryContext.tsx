@@ -11,6 +11,7 @@ import {
 interface LibraryContextType {
   books: BookType[];
   saveBooksToLibrary: (newBooks: BookType[]) => Promise<void>;
+  updateBook: (id: string, newData: {}) => Promise<void>;
 }
 
 export const LibraryContext = createContext<LibraryContextType | undefined>(
