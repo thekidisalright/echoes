@@ -22,6 +22,10 @@ interface PlayerContextType {
   setCurrentBook: Dispatch<SetStateAction<BookType | null>>;
   currentChapterIndex: number | null;
   setCurrentChapterIndex: Dispatch<SetStateAction<number>>;
+  skip: {
+    forward: () => void;
+    back: () => void;
+  };
   player: AudioPlayer;
   status: AudioStatus;
 }
@@ -45,14 +49,24 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
   const audioSource = currentBook?.chapters?.[currentChapterIndex]?.uri;
   const player = useAudioPlayer(audioSource, { updateInterval: 100 });
   const playerStatus = useAudioPlayerStatus(player);
+  const forward = () => {
+    if (!currentBook) return;
+    if (currentChapterIndex < currentBook.chapters.length - 1) {
+      setCurrentChapterIndex((prev) => prev + 1);
+    } else {
+      setCurrentChapterIndex(0);
+    }
+  };
+  const back = () => {
+    if (!currentBook) return;
+    if (currentChapterIndex !== 0) {
+      setCurrentChapterIndex((prev) => prev - 1);
+    }
+  };
 
   useEffect(() => {
     if (playerStatus.didJustFinish && currentBook) {
-      if (currentChapterIndex < currentBook.chapters.length - 1) {
-        setCurrentChapterIndex((prev) => prev + 1);
-      } else {
-        setCurrentChapterIndex(0);
-      }
+      forward();
     }
   }, [playerStatus.didJustFinish, currentBook]);
 
@@ -76,6 +90,7 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
     player,
     status: playerStatus,
     setCurrentChapterIndex,
+    skip: { forward, back },
   };
   return (
     <PlayerContext.Provider value={value}>{children}</PlayerContext.Provider>
