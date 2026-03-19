@@ -11,7 +11,7 @@ import {
 interface LibraryContextType {
   books: BookType[];
   saveBooksToLibrary: (newBooks: BookType[]) => Promise<void>;
-  updateBook: (id: string, newData: {}) => Promise<void>;
+  updateBook: (id: string, updates: Partial<BookType>) => Promise<void>;
 }
 
 export const LibraryContext = createContext<LibraryContextType | undefined>(
@@ -31,7 +31,7 @@ export const LibraryProvider = ({ children }: { children: ReactNode }) => {
         }
       } catch (error) {
         setBooks([]);
-        console.error("Erro ao carregar livros:", error);
+        console.error("Erro ao carregar livros: ", error);
       }
     };
 
@@ -44,12 +44,27 @@ export const LibraryProvider = ({ children }: { children: ReactNode }) => {
       const booksString = JSON.stringify(newBooks);
       await AsyncStorage.setItem("@books", booksString);
     } catch (error) {
-      console.error("Erro ao salvar livros:", error);
+      console.error("Erro ao salvar livros: ", error);
+    }
+  };
+
+  const updateBook = async (id: string, updates: Partial<BookType>) => {
+    try {
+      const updatedBooks = books.map((book) => {
+        if (book.id === id) {
+          return { ...book, ...updates };
+        }
+        return book;
+      });
+
+      await saveBooksToLibrary(updatedBooks);
+    } catch (error) {
+      console.error("Erro ao atualizar livro: ", error);
     }
   };
 
   return (
-    <LibraryContext.Provider value={{ books, saveBooksToLibrary }}>
+    <LibraryContext.Provider value={{ books, saveBooksToLibrary, updateBook }}>
       {children}
     </LibraryContext.Provider>
   );
