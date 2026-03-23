@@ -30,7 +30,7 @@ interface PlayerContextType {
   };
   player: AudioPlayer;
   status: AudioStatus;
-  saveProgress: () => void;
+  saveProgress: () => Promise<void>;
 }
 
 export const PlayerContext = createContext<PlayerContextType | undefined>(

@@ -14,9 +14,17 @@ const formatTime = (timeInSeconds: number) => {
 };
 
 export default function SliderComponent() {
-  const { player, status } = usePlayerContext();
+  const { player, status, currentBook } = usePlayerContext();
   const [isSliding, setIsSliding] = useState(false);
   const [sliderValue, setSliderValue] = useState(0);
+
+  useEffect(() => {
+    if (!currentBook) return;
+    if (currentBook.savedPosition !== undefined) {
+      player.seekTo(currentBook.savedPosition);
+      setSliderValue(currentBook.savedPosition);
+    }
+  }, []);
 
   useEffect(() => {
     if (!isSliding && status.currentTime) {
