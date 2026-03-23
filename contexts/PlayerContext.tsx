@@ -30,6 +30,7 @@ interface PlayerContextType {
   };
   player: AudioPlayer;
   status: AudioStatus;
+  saveProgress: () => void;
 }
 
 export const PlayerContext = createContext<PlayerContextType | undefined>(
@@ -158,6 +159,7 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
     status: playerStatus,
     setCurrentChapterIndex,
     skip: { forward, back },
+    saveProgress,
   };
   return (
     <PlayerContext.Provider value={value}>{children}</PlayerContext.Provider>
