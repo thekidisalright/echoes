@@ -40,6 +40,7 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
   const hasLoadedInitialBook = useRef(false);
   const { updateBook, books } = useLibraryContext();
   const pendingSeekTime = useRef<number | null>(null);
+  // Configurações da reprodução de áudio no dispositivo
   useEffect(() => {
     setAudioModeAsync({
       playsInSilentMode: true,
@@ -69,6 +70,7 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
+  // Verifica se o player e playerStatus já foram carregados e avança o áudio para onde havia parado anteriormente.
   useEffect(() => {
     const isReadyToSeek = playerStatus && playerStatus.duration > 0;
     if (
@@ -81,6 +83,7 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }, [playerStatus.duration, player]);
 
+  // Define como livro atual o livro que estava tocando quando o app foi fechado
   useEffect(() => {
     const bootPlayer = async () => {
       if (books.length > 0 && !hasLoadedInitialBook.current) {
@@ -104,12 +107,14 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
     bootPlayer();
   }, [books]);
 
+  // Se a faixa atual acabou, executa a função de avançar faixa
   useEffect(() => {
     if (playerStatus.didJustFinish && currentBook) {
       forward();
     }
   }, [playerStatus.didJustFinish, currentBook]);
 
+  // Decide se o áudio deve começar a tocar sozinho ou se deve esperar.
   useEffect(() => {
     if (currentBook && player) {
       player.seekTo(0);
@@ -134,6 +139,7 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
+  // Salva progresso ao fechar ou minimizar o app
   useEffect(() => {
     const subscription = AppState.addEventListener("change", (nextAppState) => {
       if (nextAppState === "background" || nextAppState === "inactive") {
