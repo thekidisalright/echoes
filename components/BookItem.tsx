@@ -8,7 +8,7 @@ export default function BookItem({ book }: { book: BookType }) {
   const { setCurrentBook, saveProgress } = usePlayerContext();
   const router = useRouter();
   const handlePress = async () => {
-    saveProgress();
+    await saveProgress();
     setCurrentBook(book);
     router.push("/player-screen");
   };
