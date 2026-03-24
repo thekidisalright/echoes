@@ -53,8 +53,8 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
   const [currentBook, setCurrentBook] = useState<BookType | null>(null);
   const [currentChapterIndex, setCurrentChapterIndex] = useState<number>(0);
   const lastBookTitleRef = useRef<string | null>(null);
-  const audioSource = currentBook?.chapters?.[currentChapterIndex]?.uri;
-  const player = useAudioPlayer(audioSource, { updateInterval: 100 });
+  const audioSource = currentBook?.chapters?.[currentChapterIndex]?.uri || null;
+  const player = useAudioPlayer(null, { updateInterval: 100 });
   const playerStatus = useAudioPlayerStatus(player);
   const forward = () => {
     if (!currentBook) return;
@@ -70,6 +70,13 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
       setCurrentChapterIndex((prev) => prev - 1);
     }
   };
+
+  // Substitui o source de áudio no player já alocado na memória
+  useEffect(() => {
+    if (audioSource && player) {
+      player.replace(audioSource);
+    }
+  }, [audioSource]);
 
   // Verifica se o player e playerStatus já foram carregados e avança o áudio para onde havia parado anteriormente.
   useEffect(() => {
