@@ -71,7 +71,7 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  // Substitue o source de audio no player já alocado na memória
+  // Substitui o source de áudio no player já alocado na memória
   useEffect(() => {
     if (audioSource && player) {
       player.replace(audioSource);
