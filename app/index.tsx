@@ -3,11 +3,13 @@ import ContinueListeningItem from "@/components/ContinueListeningItem";
 import MiniPlayer from "@/components/MiniPlayer";
 import ScanBooks from "@/components/ScanBooks";
 import { useLibraryContext } from "@/contexts/LibraryContext";
+import { usePlayerContext } from "@/contexts/PlayerContext";
 import { ScrollView, Text, View } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 
 export default function Index() {
   const { books } = useLibraryContext();
+  const { currentBook } = usePlayerContext();
   return (
     <SafeAreaProvider>
       <SafeAreaView className="flex-1 bg-neutral-800">
@@ -54,7 +56,7 @@ export default function Index() {
             </View>
           </View>
         </ScrollView>
-        <MiniPlayer />
+        {currentBook ? <MiniPlayer /> : <></>}
       </SafeAreaView>
     </SafeAreaProvider>
   );

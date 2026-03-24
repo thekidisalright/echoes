@@ -1,4 +1,5 @@
 import { useLibraryContext } from "@/contexts/LibraryContext";
+import { BookType } from "@/types/AppTypes";
 import { Ionicons } from "@expo/vector-icons";
 import { Directory, File } from "expo-file-system";
 import { TouchableOpacity } from "react-native";
@@ -9,7 +10,7 @@ export default function ScanBooks() {
     try {
       const pickedDirectory = await Directory.pickDirectoryAsync();
       if (!pickedDirectory) return;
-      const booksFound: any[] = [];
+      const booksFound: BookType[] = [];
       const scanDirectory = (currentDir: any) => {
         const contents = currentDir.list();
         const audioFiles: any[] = [];
@@ -42,10 +43,12 @@ export default function ScanBooks() {
         });
         if (audioFiles.length > 0) {
           booksFound.push({
+            id: currentDir.uri,
             title: currentDir.name,
             chapters: audioFiles,
-            author: "Unknown Author",
-            cover: coverImageUri,
+            coverImageUri: coverImageUri ? coverImageUri : undefined,
+            savedChapterIndex: 0,
+            savedPosition: 0,
           });
         }
       };

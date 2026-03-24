@@ -21,9 +21,9 @@ export default function MiniPlayer() {
           boxShadow: "0 0px 30px rgba(0,0,0,0.6)",
         }}
       >
-        {currentBook?.cover ? (
+        {currentBook?.coverImageUri ? (
           <Image
-            source={{ uri: currentBook.cover }}
+            source={{ uri: currentBook.coverImageUri }}
             className="w-14 h-14 object-cover rounded-md border border-neutral-700"
             resizeMode="cover"
           />

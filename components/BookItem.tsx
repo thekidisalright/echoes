@@ -5,12 +5,10 @@ import { useRouter } from "expo-router";
 import { Image, Text, TouchableOpacity, View } from "react-native";
 
 export default function BookItem({ book }: { book: BookType }) {
-  const { setCurrentBook, status, player } = usePlayerContext();
+  const { setCurrentBook, saveProgress } = usePlayerContext();
   const router = useRouter();
-  const handlePress = () => {
-    if (status.playing) {
-      player.pause();
-    }
+  const handlePress = async () => {
+    await saveProgress();
     setCurrentBook(book);
     router.push("/player-screen");
   };
@@ -27,14 +25,14 @@ export default function BookItem({ book }: { book: BookType }) {
       <View className="w-full">
         <View
           className={
-            book.cover
+            book.coverImageUri
               ? "overflow-hidden aspect-[3/4] w-full rounded-xl mb-1"
               : "flex-row justify-center items-center bg-neutral-700 opacity-50 aspect-[3/4] w-full rounded-xl mb-1"
           }
         >
-          {book.cover ? (
+          {book.coverImageUri ? (
             <Image
-              source={{ uri: book.cover }}
+              source={{ uri: book.coverImageUri }}
               className="w-full h-full"
               resizeMode="cover"
             />

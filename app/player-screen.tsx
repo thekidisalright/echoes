@@ -30,10 +30,10 @@ export default function PlayerScreen() {
             aspectRatio: "3 / 4",
           }}
         >
-          {currentBook?.cover ? (
+          {currentBook?.coverImageUri ? (
             <Image
               className="w-full h-full"
-              source={{ uri: currentBook.cover }}
+              source={{ uri: currentBook.coverImageUri }}
               resizeMode="cover"
               style={{ objectFit: "cover" }}
             />

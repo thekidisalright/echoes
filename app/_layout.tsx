@@ -30,8 +30,8 @@ export default function RootLayout() {
     return null;
   }
   return (
-    <PlayerProvider>
-      <LibraryProvider>
+    <LibraryProvider>
+      <PlayerProvider>
         <Stack>
           <Stack.Screen
             name="index"
@@ -62,7 +62,7 @@ export default function RootLayout() {
             }}
           />
         </Stack>
-      </LibraryProvider>
-    </PlayerProvider>
+      </PlayerProvider>
+    </LibraryProvider>
   );
 }
