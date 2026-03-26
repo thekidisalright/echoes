@@ -1,6 +1,9 @@
+import { useLibraryContext } from "@/contexts/LibraryContext";
+import { usePlayerContext } from "@/contexts/PlayerContext";
 import { BookType } from "@/types/AppTypes";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
-import { Image, Text, View } from "react-native";
+import { useRouter } from "expo-router";
+import { Image, Text, TouchableOpacity, View } from "react-native";
 import ProgressBar from "./ProgressBar";
 
 export default function ContinueListeningItem({
@@ -10,8 +13,20 @@ export default function ContinueListeningItem({
   status: string;
   book: BookType;
 }) {
+  const { setCurrentBook, saveProgress } = usePlayerContext();
+  const { updateBook } = useLibraryContext();
+  const router = useRouter();
+  const handlePress = async () => {
+    await saveProgress();
+    setCurrentBook(book);
+    await updateBook(book.id, { lastPlayedAt: Date.now() });
+    router.push("/player-screen");
+  };
   return (
-    <View className="flex-row items-center h-[80px] gap-3 border-b border-b-neutral-700">
+    <TouchableOpacity
+      onPress={handlePress}
+      className="flex-row items-center h-[80px] gap-3 border-b border-b-neutral-700"
+    >
       {book.coverImageUri ? (
         <Image
           source={{ uri: book.coverImageUri }}
@@ -46,6 +61,6 @@ export default function ContinueListeningItem({
           <Ionicons name="time" color={"#a3a3a3"} size={18} />
         )}
       </View>
-    </View>
+    </TouchableOpacity>
   );
 }
