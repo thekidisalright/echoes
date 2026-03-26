@@ -10,4 +10,5 @@ export interface BookType {
   savedChapterIndex: number;
   savedPosition: number;
   totalDuration?: number;
+  lastPlayedAt?: number;
 }
