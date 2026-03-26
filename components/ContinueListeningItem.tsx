@@ -1,29 +1,45 @@
+import { BookType } from "@/types/AppTypes";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { Image, Text, View } from "react-native";
 import ProgressBar from "./ProgressBar";
 
-export default function ContinueListeningItem({ status }: { status: string }) {
+export default function ContinueListeningItem({
+  status,
+  book,
+}: {
+  status: string;
+  book: BookType;
+}) {
   return (
     <View className="flex-row items-center h-[80px] gap-3 border-b border-b-neutral-700">
-      <Image
-        source={require("@/assets/images/thehourofthestar.jpg")}
-        className="w-16 h-16 object-cover rounded-md"
-        resizeMode="cover"
-      />
+      {book.coverImageUri ? (
+        <Image
+          source={{ uri: book.coverImageUri }}
+          className="w-16 h-16 object-cover rounded-md border border-neutral-700"
+          resizeMode="cover"
+        />
+      ) : (
+        <View className="w-16 h-16 flex justify-center items-center bg-neutral-700 rounded-md border border-neutral-700">
+          <Ionicons name="image-outline" color={"#737373"} size={24} />
+        </View>
+      )}
       <View className="flex-col flex-1 h-14 justify-between">
         <Text className="text-white text-sm font-semibold" numberOfLines={1}>
-          The Hour of the Star
+          {book.title}
         </Text>
         <Text className="text-neutral-400 text-sm mb-1" numberOfLines={1}>
-          Clarice Lispector
+          {book.author ? book.author : "Unknown"}
         </Text>
-        <ProgressBar duration={3000} currentTime={1550} />
+        <ProgressBar
+          duration={book.chapters.length || 100}
+          currentTime={book.savedChapterIndex + 1 || 50}
+        />
       </View>
       <View className="w-14 flex-col items-center">
         {status ? (
           <MaterialIcons
             name="equalizer"
-            color={status === "idle" ? "#a3a3a3" : "#D4A017"}
+            color={status === "playing" ? "#D4A017" : "#a3a3a3"}
             size={18}
           />
         ) : (
