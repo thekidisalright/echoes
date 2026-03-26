@@ -9,7 +9,12 @@ import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 
 export default function Index() {
   const { books } = useLibraryContext();
-  const { currentBook } = usePlayerContext();
+  const { currentBook, status } = usePlayerContext();
+  const recentlyPlayedList = books
+    .filter((book) => book.lastPlayedAt)
+    .sort((a, b) => (b.lastPlayedAt || 0) - (a.lastPlayedAt || 0));
+  const lastPlayedBooks = recentlyPlayedList.slice(0, 2);
+
   return (
     <SafeAreaProvider>
       <SafeAreaView className="flex-1 bg-neutral-800">
@@ -22,13 +27,29 @@ export default function Index() {
           contentContainerClassName="pb-32"
           showsVerticalScrollIndicator={false}
         >
-          <View className="px-4 mb-8">
-            <Text className="text-white text-xl font-medium mb-1">
-              Continue Listening
-            </Text>
-            <ContinueListeningItem status="idle" />
-            <ContinueListeningItem status="" />
-          </View>
+          {lastPlayedBooks.length > 0 ? (
+            <View className="px-4 mb-8">
+              <Text className="text-white text-xl font-medium mb-1">
+                Continue Listening
+              </Text>
+              {lastPlayedBooks.map((book) => (
+                <ContinueListeningItem
+                  key={book.id}
+                  book={book}
+                  status={
+                    currentBook?.id === book.id
+                      ? status.playing
+                        ? "playing"
+                        : "idle"
+                      : ""
+                  }
+                />
+              ))}
+            </View>
+          ) : (
+            <></>
+          )}
+
           <View className="px-4 ">
             <Text className="text-white text-xl font-medium mb-3">
               All Audiobooks

@@ -45,6 +45,7 @@ export default function BookItem({ book }: { book: BookType }) {
   const handlePress = async () => {
     await saveProgress();
     setCurrentBook(book);
+    await updateBook(book.id, { lastPlayedAt: Date.now() });
     router.push("/player-screen");
   };
   const handleLongPress = () => {
