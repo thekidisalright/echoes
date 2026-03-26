@@ -142,6 +142,7 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
       await updateBook(currentBook.id, {
         savedChapterIndex: currentChapterIndex,
         savedPosition: currentPosition,
+        lastPlayedAt: Date.now(),
       });
       await AsyncStorage.setItem("@lastPlayed", currentBook.id);
     }
