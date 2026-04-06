@@ -1,5 +1,8 @@
+<<<<<<< continue-listening
 import { useLibraryContext } from "@/contexts/LibraryContext";
 import { usePlayerContext } from "@/contexts/PlayerContext";
+=======
+>>>>>>> main
 import { BookType } from "@/types/AppTypes";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
@@ -13,6 +16,7 @@ export default function ContinueListeningItem({
   status: string;
   book: BookType;
 }) {
+<<<<<<< continue-listening
   const { setCurrentBook, saveProgress } = usePlayerContext();
   const { updateBook } = useLibraryContext();
   const router = useRouter();
@@ -27,6 +31,10 @@ export default function ContinueListeningItem({
       onPress={handlePress}
       className="flex-row items-center h-[80px] gap-3 border-b border-b-neutral-700"
     >
+=======
+  return (
+    <View className="flex-row items-center h-[80px] gap-3 border-b border-b-neutral-700">
+>>>>>>> main
       {book.coverImageUri ? (
         <Image
           source={{ uri: book.coverImageUri }}
