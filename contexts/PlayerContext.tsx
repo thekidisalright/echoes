@@ -52,6 +52,8 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
 
   const [currentBook, setCurrentBook] = useState<BookType | null>(null);
   const [currentChapterIndex, setCurrentChapterIndex] = useState<number>(0);
+  const currentBookRef = useRef(currentBook);
+  const currentChapterIndexRef = useRef(currentChapterIndex);
   const lastBookTitleRef = useRef<string | null>(null);
   const audioSource = currentBook?.chapters?.[currentChapterIndex]?.uri || null;
   const player = useAudioPlayer(null, { updateInterval: 100 });
@@ -70,6 +72,13 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
       setCurrentChapterIndex((prev) => prev - 1);
     }
   };
+
+  useEffect(() => {
+    currentBookRef.current = currentBook;
+  }, [currentBook]);
+  useEffect(() => {
+    currentChapterIndexRef.current = currentChapterIndex;
+  }, [currentChapterIndex]);
 
   // Substitui o source de áudio no player já alocado na memória
   useEffect(() => {
@@ -137,14 +146,16 @@ export const PlayerProvider = ({ children }: { children: React.ReactNode }) => {
   }, [currentChapterIndex, currentBook]);
 
   const saveProgress = async () => {
-    if (currentBook && player) {
+    const book = currentBookRef.current;
+    const chapterIndex = currentChapterIndexRef.current;
+    if (book && player) {
       const currentPosition = player.currentTime;
-      await updateBook(currentBook.id, {
-        savedChapterIndex: currentChapterIndex,
+      await updateBook(book.id, {
+        savedChapterIndex: chapterIndex,
         savedPosition: currentPosition,
         lastPlayedAt: Date.now(),
       });
-      await AsyncStorage.setItem("@lastPlayed", currentBook.id);
+      await AsyncStorage.setItem("@lastPlayed", book.id);
     }
   };
 
