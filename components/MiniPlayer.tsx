@@ -15,7 +15,7 @@ export default function MiniPlayer() {
   };
   return (
     <Link href={{ pathname: "/player-screen" }} asChild>
-      <View
+      <TouchableOpacity
         className="absolute bottom-6 left-4 right-4 bg-neutral-950/80 rounded-2xl border border-neutral-700/50 flex-row items-center px-4 py-3 gap-2 justify-between"
         style={{
           boxShadow: "0 0px 30px rgba(0,0,0,0.6)",
@@ -45,7 +45,10 @@ export default function MiniPlayer() {
         </View>
         <TouchableOpacity
           className="w-14 flex-col items-center"
-          onPress={togglePlayPause}
+          onPress={(e) => {
+            e.stopPropagation();
+            togglePlayPause();
+          }}
         >
           {status.playing ? (
             <Ionicons name="pause-circle" color={"#fafafa"} size={48} />
@@ -53,7 +56,7 @@ export default function MiniPlayer() {
             <Ionicons name="play-circle" color={"#fafafa"} size={48} />
           )}
         </TouchableOpacity>
-      </View>
+      </TouchableOpacity>
     </Link>
   );
 }
