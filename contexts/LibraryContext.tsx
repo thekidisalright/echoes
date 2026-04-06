@@ -1,10 +1,12 @@
 import { BookType } from "@/types/AppTypes";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { createAudioPlayer } from "expo-audio";
 import {
   createContext,
   ReactNode,
   useContext,
   useEffect,
+  useRef,
   useState,
 } from "react";
 
@@ -20,6 +22,7 @@ export const LibraryContext = createContext<LibraryContextType | undefined>(
 
 export const LibraryProvider = ({ children }: { children: ReactNode }) => {
   const [books, setBooks] = useState<BookType[]>([]);
+  const isCalculating = useRef(false);
 
   useEffect(() => {
     const loadBooks = async () => {
@@ -38,6 +41,46 @@ export const LibraryProvider = ({ children }: { children: ReactNode }) => {
     loadBooks();
   }, []);
 
+  useEffect(() => {
+    if (isCalculating.current) return;
+    const booksWithoutDuration = books.filter((b) => !b.totalDuration);
+    if (booksWithoutDuration.length === 0) return;
+    isCalculating.current = true;
+    const calculateDurations = async () => {
+      for (const book of booksWithoutDuration) {
+        try {
+          let sumSeconds = 0;
+
+          for (const chapter of book.chapters) {
+            const duration = await new Promise<number>((resolve) => {
+              const tempPlayer = createAudioPlayer(chapter.uri);
+              const listener = tempPlayer.addListener(
+                "playbackStatusUpdate",
+                (status) => {
+                  if (status.duration > 0) {
+                    listener.remove();
+                    tempPlayer.release();
+                    resolve(status.duration);
+                  }
+                },
+              );
+            });
+            sumSeconds += duration;
+          }
+          await updateBook(book.id, { totalDuration: sumSeconds });
+        } catch (error) {
+          console.error(
+            "Error while trying to fetch the book duration: ",
+            error,
+          );
+        }
+      }
+      isCalculating.current = false;
+    };
+
+    calculateDurations();
+  }, [books]);
+
   const saveBooksToLibrary = async (newBooks: BookType[]) => {
     try {
       setBooks(newBooks);
@@ -50,16 +93,18 @@ export const LibraryProvider = ({ children }: { children: ReactNode }) => {
 
   const updateBook = async (id: string, updates: Partial<BookType>) => {
     try {
-      const updatedBooks = books.map((book) => {
-        if (book.id === id) {
-          return { ...book, ...updates };
-        }
-        return book;
+      let updatedBooks: BookType[] = [];
+
+      setBooks((prev) => {
+        updatedBooks = prev.map((book) =>
+          book.id === id ? { ...book, ...updates } : book,
+        );
+        return updatedBooks;
       });
 
-      await saveBooksToLibrary(updatedBooks);
+      await AsyncStorage.setItem("@books", JSON.stringify(updatedBooks));
     } catch (error) {
-      console.error("Erro ao atualizar livro: ", error);
+      console.error("Error while updating book: ", error);
     }
   };
 
