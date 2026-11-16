@@ -23,6 +23,7 @@ abstract final class AppStrings {
   static String importReadingFiles(int count) =>
       'Lendo $count arquivo(s) de áudio…';
   static const importSaving = 'Salvando livros na biblioteca…';
+  static const defaultFolderName = 'Pasta de áudio';
   static const importNothingNewTitle = 'Nenhum arquivo novo encontrado';
   static const importNothingNewMessage =
       'Esta pasta não contém áudio compatível que ainda não esteja na biblioteca.';
