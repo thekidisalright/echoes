@@ -230,12 +230,24 @@ class LibraryRepository {
     return row == null ? null : _toBook(row);
   }
 
-  /// URIs de capítulos que pertencem a outras origens; o escaneamento as
-  /// ignora para não duplicar arquivos.
-  Future<Set<String>> chapterUrisOutside(String sourceId) async {
+  /// URIs de capítulos que pertencem a outras origens que não [sourceId]
+  /// (todas, se nulo); o escaneamento as ignora para não duplicar arquivos.
+  Future<Set<String>> chapterUrisOutside(String? sourceId) async {
     final query = _db.select(_db.chapters).join([
       innerJoin(_db.books, _db.books.id.equalsExp(_db.chapters.bookId)),
-    ])..where(_db.books.sourceId.equals(sourceId).not());
+    ]);
+    if (sourceId != null) {
+      query.where(_db.books.sourceId.equals(sourceId).not());
+    }
+    final rows = await query.get();
+    return {for (final row in rows) row.readTable(_db.chapters).uri};
+  }
+
+  /// URIs dos capítulos da origem (para liberar permissões de arquivos).
+  Future<Set<String>> chapterUrisOf(String sourceId) async {
+    final query = _db.select(_db.chapters).join([
+      innerJoin(_db.books, _db.books.id.equalsExp(_db.chapters.bookId)),
+    ])..where(_db.books.sourceId.equals(sourceId));
     final rows = await query.get();
     return {for (final row in rows) row.readTable(_db.chapters).uri};
   }

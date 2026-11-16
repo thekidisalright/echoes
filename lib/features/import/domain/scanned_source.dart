@@ -38,6 +38,14 @@ class ScannedBook {
   final String? coverPath;
   final List<ScannedChapter> chapters;
 
+  ScannedBook withCover(String? path) => ScannedBook(
+    id: id,
+    title: title,
+    author: author,
+    coverPath: path,
+    chapters: chapters,
+  );
+
   /// Soma das durações conhecidas; nula se nenhum capítulo tem duração.
   Duration? get totalDuration {
     Duration? total;
