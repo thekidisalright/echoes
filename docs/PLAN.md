@@ -120,6 +120,8 @@ Seguir `docs/FEATURES.md` e `docs/UI.md` à risca. Ordem:
 
 **Aceite:** todos os fluxos de `docs/FEATURES.md` §1–§7 executáveis no aparelho; sem textos fora de `strings.dart`; sem cores fora de `colors.dart`.
 
+✅ aceito pelo usuário em 2026-11-16 (Android 15, Xiaomi), com quatro pendências registradas para corrigir antes da Fase 6 (ver `docs/HANDOFF.md` → Estado atual): tocar num marcador não volta ao Player; arrastar o Player para baixo falha na maioria dos livros; origens "Arquivos selecionados" não se distinguem em Gerenciar; não há splash/tela de carregamento enquanto o app abre. 131 testes passando; nenhuma cor fora do tema nem texto fora de `strings.dart`.
+
 ---
 
 ## Fase 6 — Timer de sono, marcadores e acabamento
