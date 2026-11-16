@@ -91,8 +91,13 @@ class EchoesAudioHandler extends BaseAudioHandler with SeekHandler {
     mediaItem.add(null);
   }
 
+  /// Começa a tocar e retorna logo. O `Future` de `AudioPlayer.play()` só
+  /// termina quando a reprodução pausa ou para; aguardá-lo travaria quem
+  /// chama (ex.: a tela de capítulos nunca voltaria ao Player).
   @override
-  Future<void> play() => _player.play();
+  Future<void> play() async {
+    unawaited(_player.play());
+  }
 
   @override
   Future<void> pause() => _player.pause();
