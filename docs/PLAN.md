@@ -90,17 +90,19 @@ Objetivo: provar que as três peças de plataforma funcionam juntas **antes** de
 
 ## Fase 4 — Motor de áudio
 
-- [ ] Configuração Android do audio_service (manifest, `AudioServiceActivity`, permissões, canal de notificação "Reprodução").
-- [ ] `audio_session` com preset `speech`.
-- [ ] `EchoesAudioHandler`: fila de `MediaItem` por capítulo; `play`, `pause`, `seek`, `skipToNext`, `skipToPrevious` (regra dos 3 s), `skipToQueueItem`, `fastForward`/`rewind` de 15 s; ações da notificação conforme `docs/FEATURES.md` §8; publica `playbackState` e `mediaItem`.
-- [ ] Carregar livro com **índice e posição iniciais** no carregamento da fonte (sem timers).
-- [ ] `PlaybackController` + providers: livro atual, capítulo atual, posição, duração, tocando, buffering.
-- [ ] `ProgressSaver` com todas as regras de `docs/ARCHITECTURE.md` → "Salvar progresso", incluindo `AppLifecycleState`.
-- [ ] Reabrir último livro (sem tocar) na inicialização.
-- [ ] Fim do último capítulo: pausa e mantém o livro carregado.
-- [ ] Testes do `ProgressSaver` e da regra de capítulo anterior com um player fake.
+- [x] Configuração Android do audio_service (manifest, `AudioServiceActivity`, permissões, canal de notificação "Reprodução").
+- [x] `audio_session` com preset `speech`.
+- [x] `EchoesAudioHandler`: fila de `MediaItem` por capítulo; `play`, `pause`, `seek`, `skipToNext`, `skipToPrevious` (regra dos 3 s), `skipToQueueItem`, `fastForward`/`rewind` de 15 s; ações da notificação conforme `docs/FEATURES.md` §8; publica `playbackState` e `mediaItem`.
+- [x] Carregar livro com **índice e posição iniciais** no carregamento da fonte (sem timers).
+- [x] `PlaybackController` + providers: livro atual, capítulo atual, posição, duração, tocando, buffering.
+- [x] `ProgressSaver` com todas as regras de `docs/ARCHITECTURE.md` → "Salvar progresso", incluindo `AppLifecycleState`.
+- [x] Reabrir último livro (sem tocar) na inicialização.
+- [x] Fim do último capítulo: pausa e mantém o livro carregado.
+- [x] Testes do `ProgressSaver` e da regra de capítulo anterior com um player fake.
 
 **Aceite (aparelho físico):** tocar, pausar e pular pela notificação e pela tela de bloqueio; bloquear a tela por 10 min e o áudio continua; remover o app do multitarefa e reabrir → volta no capítulo e posição certos (diferença ≤ 10 s); desconectar fone pausa.
+
+✅ concluído em 2026-11-16 (Android 15, Xiaomi), com telas provisórias de lista e de player: os quatro itens conferidos pelo usuário. No banco, depois de reabrir: Misery no 6º capítulo, 837 s, `lastPlayedBookId` correto. 105 testes passando (13 novos: regras de navegação e `ProgressSaver`).
 
 ---
 
@@ -177,3 +179,9 @@ Anote aqui toda decisão tomada durante a implementação que mude ou detalhe es
 | 2026-11-16 | 3 | Progresso da importação por callback (`onProgress`), não por stream; o `ImportController` (Riverpod) o converte em estado | Uma importação por vez, sem assinatura para gerenciar; os testes ficam diretos |
 | 2026-11-16 | 3 | Pasta nova sem áudio novo não é salva e a permissão é liberada; arquivos soltos repetidos não têm a permissão liberada (ela ainda serve à origem antiga) | Não deixar origens vazias nem permissões órfãs, sem quebrar origens existentes |
 | 2026-11-16 | 3 | `StorageGateway` ficou com `pickDirectory`, `pickAudioFiles`, `listTree`, `readRange`, `persistedUris` e `releasePermission` (em vez de `openRead`/`hasPermission`) | O leitor de metadados precisa de leitura por trecho, e a checagem de disponibilidade compara todas as origens com uma única listagem de permissões |
+| 2026-11-16 | 4 | `ProgressSaver` guiado pelas atualizações do player: grava quando a posição anda 10 s desde a última gravação, ao pausar, ao trocar de capítulo e em `flush()`; sem `Timer` periódico. O primeiro estado de cada livro é só referência | Testável com um stream fake e sem gravações redundantes; cumpre as mesmas regras do ARCHITECTURE |
+| 2026-11-16 | 4 | Regras de navegação (3 s, saltos de 15 s, próximo no último) são funções puras em `player/domain/skip_rules.dart` e testadas como tal; o `EchoesAudioHandler` só as aplica ao just_audio e foi validado no aparelho | Evita abstrair o just_audio só para testes; a lógica que pode errar fica coberta |
+| 2026-11-16 | 4 | Enquanto um livro novo carrega, o `PlaybackController` suprime estado e snapshots | Os streams do just_audio misturam o livro anterior com o novo no meio da troca; sem isso o saver gravaria o capítulo errado |
+| 2026-11-16 | 4 | `lastPlayedAt` é atualizado ao abrir com `autoplay` e a cada gravação de progresso; abrir sem tocar (início do app) não mexe | A reabertura automática não deve reordenar "Recentes" |
+| 2026-11-16 | 4 | Notificação usa `drawable/ic_launcher_monochrome` como ícone pequeno (mantido no release por `res/raw/keep.xml`); fechar pelo multitarefa salva e encerra o serviço só se estiver pausado | Ícone do próprio app; continuar tocando ao remover do multitarefa é o comportamento esperado de player |
+| 2026-11-16 | 4 | Teste de navegação substitui os providers de lista por streams fixos | Streams do drift não terminam dentro do `FakeAsync` dos testes de widget e o `pumpAndSettle` trava (até o timeout de 10 min) |
