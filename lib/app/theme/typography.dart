@@ -6,10 +6,14 @@ import 'colors.dart';
 abstract final class AppTypography {
   static const serif = 'CormorantGaramond';
 
+  /// A Cormorant é variável: o peso precisa ir também no eixo `wght`.
+  static const _bold = [FontVariation.weight(700)];
+
   static const display = TextStyle(
     fontFamily: serif,
     fontSize: 48,
     fontWeight: FontWeight.w700,
+    fontVariations: _bold,
     color: AppColors.textPrimary,
   );
 
@@ -17,6 +21,7 @@ abstract final class AppTypography {
     fontFamily: serif,
     fontSize: 30,
     fontWeight: FontWeight.w700,
+    fontVariations: _bold,
     color: AppColors.textPrimary,
   );
 
@@ -24,6 +29,7 @@ abstract final class AppTypography {
     fontFamily: serif,
     fontSize: 24,
     fontWeight: FontWeight.w700,
+    fontVariations: _bold,
     color: AppColors.textHeading,
   );
 
@@ -31,6 +37,7 @@ abstract final class AppTypography {
     fontFamily: serif,
     fontSize: 20,
     fontWeight: FontWeight.w700,
+    fontVariations: _bold,
     color: AppColors.textHeading,
   );
 

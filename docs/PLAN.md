@@ -50,7 +50,7 @@ Objetivo: provar que as três peças de plataforma funcionam juntas **antes** de
 - [x] Adicionar pacotes definitivos (ver `docs/ARCHITECTURE.md` → Pacotes).
 - [x] `analysis_options.yaml` com `flutter_lints` + regras extras: `prefer_const_constructors`, `prefer_final_locals`, `always_declare_return_types`, `avoid_print`, `require_trailing_commas`, `unawaited_futures`.
 - [x] Estrutura de pastas completa conforme `docs/ARCHITECTURE.md` (pastas vazias com `.gitkeep` quando necessário).
-- [ ] Fontes Cormorant Garamond 400/500/700 em `assets/fonts/` e registradas no `pubspec.yaml`.
+- [x] Fontes Cormorant Garamond 400/500/700 em `assets/fonts/` e registradas no `pubspec.yaml`.
 - [x] `app/theme/` com todos os tokens de `docs/UI.md`; `ThemeData` escuro.
 - [x] `app/strings.dart` com todos os textos de `docs/FEATURES.md`.
 - [x] `app/router.dart` com as rotas: `/` (biblioteca), `/player` (modal de baixo), `/chapters`, `/manage`, `/settings` — telas placeholder.
@@ -163,3 +163,5 @@ Anote aqui toda decisão tomada durante a implementação que mude ou detalhe es
 | 2026-11-15 | 0 | `metadata_audio` lido por um **tokenizer esparso** (`SparseTokenizer`, que estende `HttpBasedTokenizer`): 128 KB iniciais + 8 KB finais via `readRange`, `prefetchRange` atendido sob demanda e nova tentativa sempre que faltar um trecho. Código de referência no commit `c119164` (`lib/spike/saf_metadata.dart`) | O pacote não aceita `content://` e o `Tokenizer` dele é síncrono. Estender `HttpBasedTokenizer` faz o parser MP4 pedir o `moov` inteiro (8 MB no M4B testado); sem isso ele engolia a falta de bytes e devolvia tags vazias. Resultado: 245 arquivos, 0 falhas, 40 MB lidos, 12 s |
 | 2026-11-15 | 0 | Risco anotado: `docman` aplica o Kotlin Gradle Plugin no formato antigo | O Flutter avisa que versões futuras vão recusar o build. Como o uso agora é pequeno (seletor + permissões), dá para trocar por código no próprio `SafChannel` se for preciso |
 | 2026-11-16 | 1 | `cupertino_icons` removido; tokens de espaçamento e raios em `lib/app/theme/spacing.dart`; cores derivadas (`miniPlayerBorder`, `shadow`) viraram tokens | Só Android; nenhum valor visual solto em widget, conforme o CLAUDE.md |
+| 2026-11-16 | 1 | Cormorant Garamond empacotada como **fonte variável** (`CormorantGaramond-VariableFont_wght.ttf`), com o peso aplicado via `FontVariation.weight` | Arquivo fornecido pelo usuário; um único `.ttf` cobre 400/500/700 |
+| 2026-11-16 | 1 | Splash e janela com fundo `#171614` (sem imagem); ícone e splash gerados à mão, sem `flutter_launcher_icons`/`flutter_native_splash` | Decisão do usuário. Os PNGs de `assets/images/` são os placeholders do template do Expo, por isso não foram usados |
