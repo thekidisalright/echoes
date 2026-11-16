@@ -1,132 +1,130 @@
-# Handoff: Echoes em Flutter — Fase 5 aceita com 4 pendências, depois Fase 6
+# Handoff: Echoes em Flutter — Fase 6 aceita, paridade concluída
 
 **Data:** 2026-11-16
-**Status:** em andamento. As Fases 0 a 5 estão concluídas. O usuário aceitou a Fase 5 no aparelho, mas encontrou 4 problemas que ainda não foram corrigidos. Eles devem ser resolvidos antes da Fase 6, e dois dependem de uma decisão do usuário.
+**Status:** aguardando decisão. As Fases 0 a 6 estão concluídas e aceitas no aparelho. O app novo tem paridade com o antigo. A Fase 7 (extras opcionais) depende de o usuário decidir começar.
 
 ## 1. Objetivo
 
-Reescrever do zero, em Flutter, o **Echoes**, um player pessoal de audiobooks para arquivos locais, só para Android. O app antigo, em React Native/Expo, fica na branch `main` apenas como referência de comportamento. A reescrita segue as fases de `docs/PLAN.md` e busca paridade com o app antigo, mais algumas correções. O app novo começa com a biblioteca vazia.
+Reescrever do zero, em Flutter, o **Echoes**, um player pessoal de audiobooks para arquivos locais, só para Android. O app antigo, em React Native/Expo, fica na branch `main` apenas como referência de comportamento. A reescrita segue as fases de `docs/PLAN.md`. Com o aceite da Fase 6, a paridade está completa; o que resta no plano são extras opcionais.
 
 ## 2. Contexto essencial
 
 **Repositório e ambiente**
 - Repo: `C:\alex\echoes`, branch de trabalho **`flutter-rewrite`**. A `main` não deve ser alterada.
-- Sistema: Windows 11. Shell principal PowerShell 5.1; também há Git Bash. **Não há `gh` (GitHub CLI)**, e o Python **não tem Pillow**. O Python tem `sqlite3`.
-- Flutter **3.50.0** stable (Dart 3.14) em `C:\Users\santo\develop\flutter`. O PATH pode não estar carregado; em PowerShell, rode antes:
+- Sistema: Windows 11. Shell principal PowerShell 5.1; também há Git Bash. **Não há `gh`**. O Python não tem Pillow, mas tem `sqlite3`. Para imprimir texto com acentos no Python, use `PYTHONIOENCODING=utf-8` (o console é cp1252).
+- Flutter **3.50.0** stable (Dart 3.14) em `C:\Users\santo\develop\flutter`. Carregue o PATH em PowerShell antes:
   `$env:Path = [Environment]::GetEnvironmentVariable('Path','Machine') + ';' + [Environment]::GetEnvironmentVariable('Path','User')`
-- Android SDK em `C:\Users\santo\AppData\Local\Android\Sdk` (adb em `platform-tools\adb.exe`). JDK: JBR do Android Studio (Java 21). `minSdk` = 24.
+- Android SDK em `C:\Users\santo\AppData\Local\Android\Sdk`. JDK: JBR do Android Studio (Java 21), `keytool` em `C:\Program Files\Android\Android Studio\jbr\bin\keytool.exe`. `minSdk` = 24.
 - Aparelho de teste: Xiaomi 23129RA5FL, **Android 15**, USB, serial `b515ba5a`.
-  - O adb **não injeta toques nem teclas** (`input tap`/`input keyevent` dão SecurityException). Quem toca na tela é o usuário: passe a ele um roteiro numerado e peça o resultado.
-  - Funcionam: `adb install`, `am start -W`, `am force-stop`, `exec-out screencap -p`, `logcat -d -s flutter:I` e `exec-out run-as dev.alexandre.echoes cat files/echoes.sqlite` (app debug).
-- Tempos de build medidos nesta sessão: `flutter build apk --debug` levou **113 s** depois de um `pub add`, contra ~55 s num build incremental. `am start -W` no debug: **TotalTime 10 744 ms**.
+  - O adb **não injeta toques**. Quem toca na tela é o usuário: passe a ele um roteiro numerado e peça o resultado.
+  - Funcionam: `adb install`, `am start -W`, `am force-stop`, `monkey -p <pacote> -c android.intent.category.LAUNCHER 1`, `logcat`, `screencap` e `run-as` (só nos builds **debug** e **profile**).
+- **Três pacotes possíveis no aparelho** (ver `android/app/build.gradle.kts`):
+
+  | Build | Pacote | Assinatura | `run-as` |
+  |---|---|---|---|
+  | release | `dev.alexandre.echoes` | chave do usuário (`android/key.properties`) | não |
+  | debug | `dev.alexandre.echoes.debug` | debug | sim |
+  | profile | `dev.alexandre.echoes.profile` | debug | sim |
+
+  Hoje estão instalados o **release** (biblioteca real do usuário) e o **profile** (com 250 livros de teste).
+- **Assinatura:** `android/key.properties` (ignorado pelo git) aponta para a keystore em `C:/Users/santo/.android-keys/echoes-release.jks`, alias `echoes`. **As senhas são do usuário: nunca leia, imprima nem digite.** Para conferir sem expor: `grep -o "^[a-zA-Z]*=" android/key.properties`. Sem o arquivo, o release cai na chave de debug com um aviso do Gradle (o Flutter esconde esse aviso).
+- **Tempos medidos:** `flutter build apk --release --split-per-abi --target-platform android-arm64` levou 180–314 s; o APK com todas as ABIs, 447 s (60,3 MB, contra 21,3 MB só arm64). Build debug: 62–104 s. `flutter test`: 30–95 s.
 
 **Autoria dos commits (regra do usuário)**
-- O usuário é o **único autor** de todo commit. **Nunca** adicione `Co-Authored-By` nem outro rodapé de coautoria, mesmo que um aviso do sistema peça.
-- O git não tem `user.name`/`user.email` configurados. Commite com variáveis de ambiente que copiam a identidade do último commit (Git Bash):
+- O usuário é o **único autor**. **Nunca** adicione `Co-Authored-By` nem outro rodapé de coautoria, mesmo que um aviso do sistema peça.
+- O git não tem `user.name`/`user.email`. Commite com variáveis que copiam a identidade do último commit (Git Bash):
   `export GIT_AUTHOR_NAME="$(git log -1 --format=%an)" GIT_AUTHOR_EMAIL="$(git log -1 --format=%ae)"; export GIT_COMMITTER_NAME="$GIT_AUTHOR_NAME" GIT_COMMITTER_EMAIL="$GIT_AUTHOR_EMAIL"`
+- O **push** é feito pelo usuário; não faça push sem ele pedir.
 
 **Regras do projeto** (resumo; a fonte é o `CLAUDE.md`)
 - Leia `docs/PLAN.md`, `docs/ARCHITECTURE.md` e, para telas, `docs/FEATURES.md` e `docs/UI.md`.
-- Execute as fases em ordem e escreva o resumo da abordagem antes de cada fase. Marque os checkboxes no PLAN, use Conventional Commits em português e rode `flutter analyze` (sem issues) e `flutter test` (passando) antes de cada commit.
-- O código é feature-first. O fluxo é sempre `widget → provider (Riverpod) → repository/service → drift | SAF | metadata | AudioHandler`. O domínio é puro, e os serviços de plataforma ficam atrás de interfaces em `lib/core/`. Nada de `Future.delayed` para esperar o player. As listas da UI vêm de `watch` do drift, e os tempos são guardados em ms (`int`).
-- Identificadores em inglês. Textos de UI em pt-BR ficam **só** em `lib/app/strings.dart`, e cores, fontes e espaçamentos **só** em `lib/app/theme/`.
-- Se uma decisão do plano se mostrar inviável: pare, explique, proponha uma alternativa e registre em "Registro de decisões" do PLAN. Peça antes de adicionar pacotes que não estão no ARCHITECTURE.
+- Fases em ordem, resumo da abordagem antes de cada fase, checkbox marcado no PLAN, Conventional Commits em português, `flutter analyze` sem issues e `flutter test` passando antes de cada commit.
+- Feature-first; fluxo `widget → provider (Riverpod) → repository/service → drift | SAF | metadata | AudioHandler`; domínio puro; plataforma atrás de interfaces em `lib/core/`; nada de `Future.delayed` para esperar o player; listas da UI por `watch` do drift; tempos em ms (`int`).
+- Identificadores em inglês; textos pt-BR **só** em `lib/app/strings.dart`; cores, fontes e espaçamentos **só** em `lib/app/theme/`.
+- Decisão do plano inviável: pare, explique, proponha e registre em "Registro de decisões" do PLAN. Peça antes de adicionar pacotes fora do ARCHITECTURE.
 
-**Decisões já tomadas** (todas também em `docs/PLAN.md` → "Registro de decisões")
+**Decisões tomadas nesta sessão** (todas também no "Registro de decisões" do `docs/PLAN.md`; as anteriores estão lá e no handoff `git show 146127e:docs/HANDOFF.md`)
 
 | Decisão | Motivo |
 |---|---|
-| Riverpod 3, go_router, drift, just_audio + audio_service, docman, metadata_audio | Plano original (`docs/ARCHITECTURE.md`) |
-| Material vem de `package:material_ui/material_ui.dart` | No Flutter 3.50 o Material saiu do SDK |
-| Listagem de pastas e leitura de trechos via canal nativo `SafChannel.kt` | docman listava 244 arquivos em 28 s; o canal faz em 0,4–1,8 s |
-| `metadata_audio` lido por tokenizer esparso sobre `readRange` | O pacote não aceita `content://` |
-| Busca da biblioteca em Dart, não `LIKE` | `LIKE` do SQLite só ignora caixa em ASCII |
-| URI da pasta convertido para o formato de árvore (`treeUriOf`) | A permissão persistida fica em `…/tree/X` |
-| `ProgressSaver` guiado por eventos, sem timer | Testável e sem gravações redundantes |
-| **Fase 5:** falhas de importação viram alerta no `EchoesApp` (`rootNavigatorKey`) | A importação pode terminar depois de o usuário sair de Gerenciar |
-| **Fase 5:** ao remover uma origem, `ImportController.remove` chama `PlaybackController.close()` se o livro carregado for dela | O MiniPlayer some e o progresso é salvo antes |
-| **Fase 5:** livro com origem indisponível leva a Gerenciar com `ManageLibraryArgs(notice)` | FEATURES §2 |
-| **Fase 5:** tocar num livro abre o Player **sem tocar** (`autoplay: false`) | Paridade com o app antigo |
-| **Fase 5:** o botão de Temporizador do Player fica para a Fase 6 | Não exibir botão sem função |
-| **Fase 5:** a rota do Player não é opaca, e o arrasto usa um `Transform` próprio | A biblioteca aparece por baixo durante o gesto |
-| **Fase 5:** `AppColors.danger` (`#8C3F35`) e escala `AppSpacing.xs…xxl` | O UI.md não tinha cor destrutiva; nenhum valor solto em widget |
-| **Fase 5:** `image_picker` atrás de `ImageGateway`; `package_info_plus` atrás de `AppInfo` (`lib/core/`) | Regra 4 do CLAUDE.md; o `package_info_plus` foi aprovado pelo usuário |
-| **Fase 5:** a edição de livro passa pelo `BookEditor`; `PlaybackController.refreshBook` atualiza o livro carregado e a notificação | O Player e a notificação não ficam com dados velhos |
-| **Fase 5:** os textos de biblioteca vazia e de busca sem resultado vêm do app antigo | Textos reais em vez de inventados |
+| `EchoesAudioHandler.play()` dispara `AudioPlayer.play()` sem aguardar | O `Future` do just_audio só termina quando a reprodução para; a tela de capítulos nunca voltava ao Player |
+| Player fecha também pelo overscroll no topo quando rola | Com conteúdo mais alto que a tela, o `Scrollable` ganhava o arrasto vertical |
+| Origem de arquivos soltos mostra o título atual do livro (`watchSources`) | Escolha do usuário; as origens "Arquivos selecionados" não se distinguiam. Muda FEATURES §1.2 |
+| `SleepTimerService` com `Timer` de relógio injetável; fim do capítulo pausa quando o índice muda | A regra 5 proíbe timers para esperar o player, não para medir tempo; testável sem `fake_async` |
+| Player cabe numa tela; capa encolhe; rola só abaixo de 600 px × escala da fonte | No aparelho, a linha de cancelar o timer ficava fora da tela |
+| "Desligar temporizador" dentro da folha, não abaixo das ações | Escolha do usuário. Muda FEATURES §3 |
+| Capítulos e marcadores em abas ("CAPÍTULOS" / "MARCADORES (n)") | Escolha do usuário: marcadores ficavam no fim de listas enormes. Muda FEATURES §5 |
+| Release assinado por `key.properties`; debug com sufixo `.debug`; profile como `.profile` via `androidComponents.onVariants` | Builds convivem no aparelho; `applicationIdSuffix` no buildType profile vaza para os plugins e quebra o build |
+| Importação continua na thread principal | Release: 245 arquivos em 13,6 s sem quadros perdidos; o tempo é E/S do SAF |
+| Splash do Android 12+ com o ícone, também em `values-night-v31` | Escolha do usuário após medir o release; o qualificador `night` vencia o `v31` |
+| Capas da grade decodificadas a no máximo 2× (`BookGridItem.coverPixelRatio`) | Profile com 250 livros: quadros > 16 ms caíram de 5,7% para 2,0% |
 
 ## 3. O que já foi feito (cronológico)
 
-1. **Fases 0 a 4** (até `7ffe751`, que já está em `origin/flutter-rewrite`): spike, fundação, banco, importação e motor de áudio. O handoff anterior está em `git show 7ffe751:docs/HANDOFF.md`.
-2. **Fase 5 — Telas** (nesta sessão):
-   - `247c90b` 5.1 Gerenciar: `ScreenHeader`, `dialogs.dart` (alerta e confirmação), `ImportStatusBanner`, `ImportModeDialog`, `SourceTile`, remoção com confirmação e alertas de falha no app inteiro.
-   - `3c59fa7` 5.2 Biblioteca: `librarySearchProvider`, `librarySortProvider`, `continueListeningProvider`, `BookCover` (com `cacheWidth`), `BookGridItem`, `ContinueListeningItem`, `SearchField`, `SortChips`, `EmptyState` e `open_book.dart`.
-   - `3c5e99d` 5.3 MiniPlayer com barra fina de progresso do capítulo.
-   - `4b98953` 5.4 Player: `SeekBar` (busca só ao soltar), `PlayerControls`, marcador com o aviso "Salvo" por 1,5 s e arrastar para fechar. Também `EchoesAudioHandler.seekInChapter` e `PlaybackController.playAt`/`currentPosition`.
-   - `ae5298a` 5.5 Capítulos e marcadores: rola até o capítulo atual (`jumpTo` no primeiro frame com dados) e ganhou o `formatShortDate`.
-   - `65d4ee8` 5.6 Diálogo de edição: `BookEditor`, `ImageGateway`/`ImagePickerGateway`, `refreshBook` e `EchoesAudioHandler.updateItems`.
-   - `cdd310d` 5.7 Configurações: radios de ordem e "Sobre" com a versão (`package_info_plus` 10.2.2).
-   - `eaf1732` docs: ARCHITECTURE e 10 decisões no registro do PLAN.
-3. **Testes:** passaram de 105 para **131** (26 novos: widgets das 5 telas, `SeekBar`, `MiniPlayer`, `BookEditor`, `formatShortDate`).
-4. **Descartado:** nada nesta sessão.
+1. **Fases 0 a 5**: até `146127e`. Detalhes em `git show 146127e:docs/HANDOFF.md`.
+2. **Pendências da Fase 5** (nesta sessão):
+   - `e48074a` fix(player): tocar capítulo ou marcador volta ao Player. Teste novo `echoes_audio_handler_test.dart`.
+   - `5b4af7f` fix(player): arrastar para fechar mesmo quando o conteúdo rola. Teste novo `player_screen_test.dart`; **conferido que falha sem a correção**.
+   - `b4a52e2` fix(import): origem de arquivos soltos mostra o título do livro.
+3. **Fase 6**:
+   - `cc809b3` feat(sleep-timer): `SleepTimerState` (domínio), `SleepTimerService`, providers, folha e botão no Player. 10 testes de serviço com relógio e timers falsos.
+   - `e5db208` fix(player): Player sem rolagem e "Desligar temporizador" na folha. Motivo: o usuário só achava o "Cancelar temporizador" rolando a tela.
+   - `e1b0027` feat(chapters): abas de capítulos e marcadores (`TabBarTheme` no tema).
+   - `3127b27` fix(a11y): `test/support/accessibility.dart` (área de toque ≥ 44 e rótulos) aplicado em 7 testes de tela. Achou os chips de ordenação com 33 px; corrigido sem mudar o desenho.
+   - `407541a` chore(android): assinatura do release e sufixo `.debug`.
+   - `f8b38cb` feat(android): ícone no splash do Android 12+.
+   - `0a56c9c` perf(library): capas da grade a no máximo 2×.
+   - `ec10381` chore(android): build profile como `dev.alexandre.echoes.profile`.
+   - `1440776` docs: aceite da Fase 6 no PLAN.
+4. **Testes:** de 131 para **150**.
+5. **Descartado:**
+   - A linha "Cancelar temporizador" abaixo das ações do Player: ficava fora da tela no Xiaomi; virou opção da folha.
+   - `applicationIdSuffix = ".profile"` no buildType: o Gradle falhou com "Library projects cannot set applicationIdSuffix".
+   - Capas da grade na densidade do aparelho (2,75×): 5,7% de quadros lentos com 250 livros; o cache de imagens enchia em 99 MB.
+   - Isolate para a importação: medido como desnecessário (nenhum "Skipped frames" do processo do app).
 
 ## 4. Estado atual
 
-- Branch `flutter-rewrite`, HEAD **`eaf1732`** (anterior ao commit deste handoff). **8 commits locais à frente de `origin/flutter-rewrite` (`7ffe751`), sem push.** O working tree só tem as mudanças deste handoff e do PLAN.
-- `flutter analyze`: **No issues found**. `flutter test`: **131 testes passando** (medidos em `eaf1732`).
-- Nenhum `Color(0x…)` fora de `lib/app/theme/` e nenhum `Text('…')` literal em `lib/features` (conferido com grep).
-- **Aceite da Fase 5:** o usuário testou no aparelho e aceitou, **sem corrigir** os quatro problemas abaixo.
-
-**Problemas encontrados pelo usuário no aparelho (não corrigidos)**
-
-1. **Tocar num marcador toca no ponto certo, mas não volta ao Player.**
-   - Causa provável, não verificada no aparelho: `PlaybackController.playAt` (e também `playChapter`) faz `await play()`. Com o just_audio, o `Future` de `AudioPlayer.play()` só termina quando a reprodução **pausa ou para**, então o `context.pop()` em `ChaptersScreen._openBookmark`/`_playChapter` nunca roda.
-   - Tocar num capítulo provavelmente tem o mesmo defeito; o usuário não relatou nem foi conferido. `openBook(autoplay: true)` e `restoreLastBook` também fazem `await play()` (linhas 77 e 112 de `playback_controller.dart`).
-   - Correção sugerida: `unawaited(_handler.play())` em `playAt`/`playChapter`, ou não aguardar o `play` na tela. Acrescente um teste que garanta que esses métodos terminam.
-2. **Arrastar o Player para baixo não funciona na maioria dos livros**, mas funcionou com o livro de arquivo solto.
-   - Causa provável, não verificada: em `player_screen.dart`, o conteúdo está num `SingleChildScrollView` dentro do `GestureDetector(onVerticalDrag…)`. Quando o conteúdo é mais alto que a tela (título em 2 linhas, nomes longos, capa de 45% da altura), o `Scrollable` ganha a disputa pelo arrasto vertical. O livro de arquivo solto provavelmente cabia na tela, sem rolagem.
-   - Opções: (a) layout que caiba sem rolar (`NeverScrollableScrollPhysics`, com a capa encolhendo); (b) fechar pelo overscroll no topo (`NotificationListener<OverscrollNotification>` com o offset em 0); (c) aceitar o arrasto só no cabeçalho e na capa.
-3. **Em Gerenciar biblioteca não dá para diferenciar as origens de arquivos selecionados.** Todas se chamam "Arquivos selecionados" (`AppStrings.selectedFilesSourceName`, como pede FEATURES §1.2). **Precisa de decisão do usuário** (seção 6).
-4. **Não há splash nem tela de carregamento enquanto o app abre.**
-   - Hoje a janela fica com o fundo `#171614` sem imagem (decisão da Fase 1), e o `main` aguarda `AudioSession` e `AudioService.init` antes do `runApp`.
-   - No debug, `am start -W` mediu 10,7 s, o que inclui a inicialização em modo JIT; o release deve ser bem mais rápido, mas ainda não foi medido. **Precisa de decisão do usuário** (seção 6).
-
-**Outras observações**
-- Na grade aparece "1 capítulos" (*Fire & Blood*). O texto `"{n} capítulos"` vem do FEATURES, e o app antigo fazia o mesmo. É uma correção trivial se o usuário quiser.
-- **Textos inventados** ainda a revisar com o usuário: `sourceUnavailableHint`, `defaultFolderName` ("Pasta de áudio"), `openBookError`, `editBookError` e os rótulos de acessibilidade.
-- **Não testado no aparelho:** importar arquivos soltos funcionou (o usuário adicionou um). Não foram conferidos: remover origem enquanto toca, fim do último capítulo, a regra dos 3 s pelo botão, tocar num capítulo da lista e restaurar dados originais.
+- Branch `flutter-rewrite`, HEAD **`1440776`** (anterior ao commit deste handoff). **3 commits locais à frente de `origin/flutter-rewrite` (`f8b38cb`), sem push**: `0a56c9c`, `ec10381`, `1440776`, mais este handoff.
+- Working tree: só a pasta **`android/build/`**, gerada pelo Gradle, não rastreada e **fora do `.gitignore`**. Não foi commitada.
+- `flutter analyze`: **No issues found**. `flutter test`: **150 testes passando** (medidos em `1440776`).
+- **Medições no Xiaomi:**
+  - Release, abertura a frio (`am start -W`, TotalTime): 1 158–2 261 ms (debug: 10 744 ms).
+  - Release, importação de `Download/Audiobooks` (245 arquivos, 3 livros): 13 552 ms.
+  - Profile, rolagem da grade com 250 livros em pé: 2 064 quadros, 41 acima de 16 ms (2,0%), raster máx. 92 ms (primeiro quadro), cache de imagens 99 MB / 168 capas.
+- **Funciona e foi aceito no aparelho:** todo o checklist da Fase 6 (importar nos dois modos, arquivos soltos, reimportar, remover origem tocando, editar e reimportar, timers, marcadores, reiniciar o aparelho, origem indisponível).
+- **Nada quebrado nem a meio caminho.**
 
 ## 5. Próximos passos
 
-1. Ler `CLAUDE.md`, `docs/PLAN.md` (Fase 6) e este handoff.
-2. **Corrigir as pendências da Fase 5**, uma por commit `fix(...)`:
-   1. Marcador e capítulo voltam ao Player (problema 1). Aceite: no aparelho, o toque toca e volta ao Player; teste unitário ou de widget cobrindo o retorno.
-   2. Arrastar para fechar em qualquer livro (problema 2). Aceite: funciona com *A Guerra dos Tronos* e *Misery*, sem quebrar a rolagem em telas pequenas.
-   3. **Depende do usuário:** como diferenciar as origens de arquivos (problema 3).
-   4. **Depende do usuário:** splash ou tela de carregamento (problema 4).
-3. Reinstalar e pedir ao usuário que confira os itens corrigidos (roteiro numerado).
-4. **Fase 6**, na ordem do PLAN: `SleepTimerService` + folha inferior + botão no Player ("Timer ativo"/"Timer · 12 min"), marcadores (já existem; revisar contra FEATURES), animações, acessibilidade, desempenho (importação de 245 arquivos em 16 s na thread principal), build release assinado. Comece pelo resumo da abordagem.
-5. **Depende do usuário:** autorizar o push dos 9 commits locais (8 da Fase 5 mais este handoff).
+1. **Depende do usuário:** decidir se começa a Fase 7 ou encerra a reescrita aqui.
+2. **Depende do usuário:** push dos commits locais.
+3. Acrescentar `android/build/` ao `.gitignore` (commit `chore:`). Aceite: `git status --short` vazio depois de um build.
+4. Se a Fase 7 começar, escreva o resumo da abordagem e siga a ordem do PLAN:
+   1. Velocidade de reprodução por livro: coluna `playbackSpeed` em `books` e migração para `schemaVersion = 2`.
+   2. Capítulos internos de M4B (`startMs`/`endMs`; o handler recorta a fonte por capítulo). *Fire & Blood* no aparelho é um M4B com 1 capítulo e serve de teste.
+   3. Marcar como concluído e filtro de concluídos.
+5. **Depende do usuário:** desinstalar o app profile (`dev.alexandre.echoes.profile`) quando não precisar mais dos 250 livros de teste.
 
 ## 6. Perguntas em aberto
 
-- **Origens de arquivos com o mesmo nome:** (a) mostrar o título do livro da origem no lugar de "Arquivos selecionados"; (b) acrescentar a data da importação (`lastScannedAt`) ao subtítulo; (c) usar o nome do primeiro arquivo; (d) permitir renomear a origem. As opções (a) e (c) mudam o que FEATURES §1.2 diz.
-- **Splash:** (a) splash nativo do Android 12+ com o ícone vetorial (`windowSplashScreenAnimatedIcon`, mudando a decisão da Fase 1); (b) mostrar logo um primeiro frame Flutter com "Echoes" e um spinner enquanto o áudio inicializa; (c) medir antes no release (Fase 6) e decidir depois.
-- **Push** dos commits locais para `origin/flutter-rewrite`: aguardando o usuário.
-- **Textos inventados** (seção 4): confirmar ou trocar.
-- **Cache de capa:** reescanear sobrescreve `sha1(bookId).jpg` no mesmo caminho, e o `FileImage` pode mostrar a capa antiga até o app reiniciar. Opções: `FileImage(...).evict()` depois de importar, ou um timestamp no nome da capa escaneada. As capas personalizadas já usam timestamp.
-- **Duplicatas entre origens**, **capítulos internos de M4B** (Fase 7), **aviso do Kotlin Gradle Plugin do docman** e **merge na `main`**: sem mudança desde o handoff anterior.
+- **Fase 7:** começar ou parar? As três tarefas são independentes.
+- **Push** dos commits locais: aguardando o usuário.
+- **Cache de capa ao reimportar:** reescanear sobrescreve `sha1(bookId).jpg` no mesmo caminho, e o `FileImage` pode mostrar a capa antiga até reiniciar o app. Opções: `FileImage(...).evict()` depois de importar, ou timestamp no nome da capa escaneada (as capas personalizadas já usam timestamp). Não foi observado no aparelho.
+- **Textos inventados** ainda sem revisão: `sourceUnavailableHint`, `defaultFolderName` ("Pasta de áudio"), `openBookError`, `editBookError` e rótulos de acessibilidade.
+- **"1 capítulos"** na grade (*Fire & Blood*): o texto vem do FEATURES e do app antigo; correção trivial se o usuário quiser.
+- **Duplicatas entre origens**, **aviso do Kotlin Gradle Plugin** (plugins que aplicam KGP; futuras versões do Flutter vão falhar o build) e **merge na `main`**: sem mudança.
 
 ## 7. Artefatos relevantes
 
-**Arquivos-chave da Fase 5**
-- Compartilhados: `lib/app/widgets/screen_header.dart`, `lib/app/widgets/dialogs.dart`, `lib/app/router.dart` (`rootNavigatorKey`, `ManageLibraryArgs`, Player com `opaque: false`), `lib/app/app.dart` (alertas de importação).
-- Gerenciar: `lib/features/import/presentation/manage_library_screen.dart`, `widgets/{import_status_banner,import_mode_dialog,source_tile}.dart`.
-- Biblioteca: `lib/features/library/presentation/{library_screen,library_providers,open_book}.dart`, `widgets/{book_cover,book_grid_item,continue_listening_item,search_field,sort_chips,empty_state,book_edit_dialog}.dart`, `data/book_editor.dart`.
-- Player: `lib/features/player/presentation/player_screen.dart` (arrasto: `_onDragUpdate`/`_onDragEnd`), `widgets/{mini_player,seek_bar,player_controls}.dart`. Controller: `playAt`, `playChapter`, `refreshBook`, `currentPosition`.
-- Capítulos: `lib/features/chapters/presentation/chapters_screen.dart` (`_openBookmark`, `_playChapter`).
-- Marcadores: `lib/features/bookmarks/presentation/bookmark_providers.dart` (`currentBookmarksProvider`).
-- Configurações: `lib/features/settings/presentation/{settings_screen,settings_providers}.dart` (`librarySortProvider`, `appVersionProvider`).
-- Plataforma: `lib/core/images/`, `lib/core/app_info/`, `lib/core/providers.dart`.
+**Arquivos-chave desta sessão**
+- Timer: `lib/features/sleep_timer/domain/sleep_timer_state.dart`, `data/sleep_timer_service.dart`, `presentation/{sleep_timer_providers,sleep_timer_sheet}.dart`.
+- Player: `lib/features/player/presentation/player_screen.dart` (`_minFitHeight`, `content(fits:)`, `_onScroll`, `_SleepTimerButton`).
+- Capítulos: `lib/features/chapters/presentation/chapters_screen.dart` (`DefaultTabController`).
+- Capas: `lib/features/library/presentation/widgets/book_cover.dart` (`maxPixelRatio`), `book_grid_item.dart` (`coverPixelRatio`).
+- Origens: `LibraryRepository.watchSources` (subconsulta `book_title`).
+- Android: `android/app/build.gradle.kts`, `android/app/src/main/res/values-v31/styles.xml` e `values-night-v31/styles.xml`.
+- Testes: `test/support/accessibility.dart`, `test/features/sleep_timer/data/sleep_timer_service_test.dart`, `test/features/player/presentation/player_screen_test.dart`, `test/features/player/data/echoes_audio_handler_test.dart`.
 
 **Comandos**
 ```powershell
@@ -134,45 +132,53 @@ $env:Path = [Environment]::GetEnvironmentVariable('Path','Machine') + ';' + [Env
 dart format lib test
 flutter analyze
 flutter test --timeout 60s
-flutter build apk --debug
+flutter build apk --release --split-per-abi --target-platform android-arm64
+flutter build apk --profile --split-per-abi --target-platform android-arm64
 $adb = "$env:LOCALAPPDATA\Android\Sdk\platform-tools\adb.exe"
-& $adb install -r build\app\outputs\flutter-apk\app-debug.apk
+& $adb install -r build\app\outputs\flutter-apk\app-arm64-v8a-release.apk
 & $adb shell am start -W -n dev.alexandre.echoes/.MainActivity
-& $adb logcat -d -s flutter:I
-cmd /c "`"$adb`" exec-out screencap -p > tela.png"
+& $adb shell monkey -p dev.alexandre.echoes.profile -c android.intent.category.LAUNCHER 1
+& $adb logcat -d -s flutter:I Choreographer:I
 ```
 
-**Inspecionar o banco do aparelho** (Git Bash, numa pasta temporária)
+**Conferir a assinatura de um APK** (Git Bash)
 ```bash
-ADB="$LOCALAPPDATA/Android/Sdk/platform-tools/adb.exe"
-"$ADB" exec-out run-as dev.alexandre.echoes cat files/echoes.sqlite > echoes.sqlite
-"$ADB" exec-out run-as dev.alexandre.echoes cat files/echoes.sqlite-wal > echoes.sqlite-wal
-python -I -c "import sqlite3; c=sqlite3.connect('echoes.sqlite'); print(ascii(c.execute('select * from progress').fetchall()))"
+BT=$(ls -d "$LOCALAPPDATA"/Android/Sdk/build-tools/* | tail -1)
+"$BT/apksigner.bat" verify --print-certs build/app/outputs/flutter-apk/app-arm64-v8a-release.apk | grep "DN:"
 ```
 
-**Dados de teste no aparelho**
-- `Download/Audiobooks` em "Cada pasta é um livro": *Fire & Blood* (M4B, 1 capítulo, 26h 24m), *A Guerra dos Tronos* (185 MP3) e *Misery* (59 MP3, 13h 03m, sem capa, autor vazio).
-- Uma origem de arquivo solto, adicionada pelo usuário nesta sessão.
-- O usuário pode ter editado livros e criado marcadores durante o teste: confira o banco antes de supor o estado.
+**Banco de teste com N livros** (profile ou debug; o script está no histórico desta sessão e foi descartado com o scratchpad)
+1. `adb exec-out run-as <pacote> cat files/echoes.sqlite > echoes.sqlite` (não existe `-wal` no aparelho depois de `am force-stop`).
+2. Em Python: duplicar `books` (id `<id>#seedK`, título com sufixo) e `chapters`, cada cópia com capa própria `covers/<sha>_seedK.jpg`; `pragma wal_checkpoint(truncate)` e `journal_mode=delete`.
+3. `adb push` para `/data/local/tmp/`, `chmod 644`, `run-as <pacote> cp ... files/echoes.sqlite` e as cópias de capa via `run-as <pacote> sh < /data/local/tmp/copias.sh`.
+
+**Medir quadros:** registre temporariamente em `main.dart` um `SchedulerBinding.instance.addTimingsCallback` só com `kProfileMode`, logando build/raster máximos e `PaintingBinding.instance.imageCache.currentSizeBytes`. Não commite.
+
+**Dados no aparelho**
+- Release: biblioteca real do usuário (`Download/Audiobooks` em "Cada pasta é um livro" e outras origens criadas no aceite).
+- Profile: 250 livros (3 reais multiplicados), 20 336 capítulos, 167 capas.
+- `Download/Audiobooks`: *Fire & Blood* (M4B, 1 capítulo), *A Guerra dos Tronos* (185 MP3), *Misery* (59 MP3, sem capa). O título de *Misery* vem com um caractere errado ("Obsess" + caractere chinês): **o defeito está no próprio arquivo, não no app** (confirmado pelo usuário).
 
 ## 8. Instruções para a próxima sessão
 
-- **Idioma e tom:** português do Brasil, direto. O usuário prefere resultados medidos (tempos, contagens) a promessas, e relata o teste no aparelho em tópicos curtos.
-- **Siga o `CLAUDE.md` à risca.** Commits **sem coautoria** (seção 2). Antes de commitar, confira o `git status --short`, porque `dart format lib test` pode reformatar arquivos de commits anteriores.
-- **Peça permissão para:** downloads, push, mudança de configuração global, exclusão de arquivos fora do projeto e pacotes que não estão no ARCHITECTURE.
+- **Idioma e tom:** português do Brasil, direto. O usuário prefere resultados medidos (tempos, contagens) a promessas e relata testes no aparelho em tópicos curtos. Ele pede para esperar a confirmação dele antes de começar uma fase: proponha e aguarde.
+- **Siga o `CLAUDE.md` à risca.** Commits **sem coautoria**. Antes de commitar, confira o `git status --short` e adicione arquivos por nome (há `android/build/` solto).
+- **Peça permissão para:** push, downloads, desinstalar apps no aparelho (apaga a biblioteca), pacotes fora do ARCHITECTURE e mudanças em FEATURES.
 - **Armadilhas conhecidas:**
-  - **`AudioPlayer.play()` do just_audio só termina quando a reprodução para**: nunca dê `await` nele antes de navegar ou de continuar um fluxo de UI. Foi a causa provável do problema 1.
-  - **`GestureDetector` vertical em volta de um `Scrollable` perde o arrasto** quando há rolagem. Foi a causa provável do problema 2.
-  - Os testes de widget **não podem ler `playbackControllerProvider` no `build`**: o `audioHandlerProvider` lança `UnimplementedError`. Leia o controller só nos callbacks.
-  - **Os streams do drift travam testes de widget** (`pumpAndSettle`). Sobrescreva com `Stream.value(...)` **todos** os providers de stream que a tela usa: `libraryBooksProvider`, `continueListeningProvider`, `librarySortProvider`, `sourcesProvider`, `playerStateProvider`, `playerPositionProvider`, `currentBookmarksProvider`. Rode `flutter test --timeout 60s`.
-  - **Notifier do Riverpod 3 não aceita `..state = x` no `overrideWith`** ("uninitialized state"). Crie uma subclasse com `build()` devolvendo o valor (ver `_FixedSearch` em `library_screen_test.dart`).
-  - **Trocar os overrides de um `ProviderScope` com um segundo `pumpWidget` não atualiza o stream**: faça testes separados.
-  - **Rolar até um item numa lista que chega por stream**: o `initialScrollOffset` no `initState` não serve, porque o valor ainda não chegou. Role no primeiro `build` com dados, com `addPostFrameCallback` + `jumpTo`.
-  - `find.text('Autor')` acha o rótulo do campo e também o valor: use valores distintos nos testes.
-  - `package:flutter/material.dart` está obsoleto → use `package:material_ui/material_ui.dart`. Os ícones do `ionicons` são em camelCase.
-  - Heredocs longos no Git Bash falham → escreva arquivos Dart com Write/Edit; scripts Python preservam `\r\n`.
-  - **`build_runner` 2.17 ignora `--delete-conflicting-outputs`** → rode `dart run build_runner build`.
-  - **docman devolve a pasta em formato de documento** → sempre `treeUriOf` (já feito no gateway).
-  - O primeiro screenshot após abrir o app pode vir vazio → espere ~8 s.
-  - Fonte variável: use `fontVariations`, não só `fontWeight`.
-- **Comportamento do app antigo:** use `git show main:<caminho>` (ex.: `app/index.tsx`, `app/directories.tsx`, `components/BookItem.tsx`) como referência de comportamento, nunca de estrutura.
+  - **Screenshots com `screencap` capturam o que estiver na tela, inclusive outros apps do usuário.** Abra o Echoes antes (`am start` ou `monkey`) e, se a captura pegar outro app, apague o arquivo sem descrever o conteúdo.
+  - **`am start -W` não mostra se o splash apareceu**: só o usuário vê. E o qualificador `values-night` vence `values-v31`; repita os itens de splash em `values-night-v31`.
+  - **Git Bash converte `/data/local/tmp` num caminho do Windows** em `adb push`/`adb shell` → use `export MSYS_NO_PATHCONV=1`.
+  - **`rm` dentro de `sh -c` é barrado pela checagem de segurança** → use pastas novas no scratchpad em vez de apagar.
+  - **O plugin do Flutter cria o buildType `profile` copiando o `debug` antes do nosso bloco e copia o `profile` para os plugins** → mude o `applicationId` do profile só por `androidComponents.onVariants`.
+  - **Instalar um APK com assinatura diferente sobre o mesmo pacote falha** (`INSTALL_FAILED_UPDATE_INCOMPATIBLE`) e não estraga nada; desinstalar para resolver apaga os dados.
+  - **`AudioPlayer.play()` só termina quando a reprodução para**: nunca dê `await` antes de navegar.
+  - **`GestureDetector` vertical em volta de um `Scrollable` perde o arrasto** quando há rolagem.
+  - **Fonte de teste (Ahem) é mais larga que a real**: linhas de botões podem transbordar só no teste → use `Flexible` e `maxLines`/ellipsis.
+  - **Diretrizes de acessibilidade:** use `expectAccessible(tester)` de `test/support/accessibility.dart` nos testes de tela novos.
+  - Os testes de widget **não podem ler `playbackControllerProvider` no `build`**; sobrescreva **todos** os providers de stream da tela com `Stream.value(...)` (inclusive `sleepTimerStateProvider` ou `sleepTimerServiceProvider`); rode `flutter test --timeout 60s`.
+  - Serviço com timer em teste: injete `clock` e `createTimer` (ver `_FakeTime` em `sleep_timer_service_test.dart`); em teste de widget, use um timer que nunca dispara para não deixar timer pendente.
+  - Notifier do Riverpod 3 não aceita `..state = x` no `overrideWith` → subclasse com `build()`.
+  - `package:flutter/material.dart` está obsoleto → `package:material_ui/material_ui.dart`. Ícones do `ionicons` em camelCase.
+  - `build_runner` 2.17 ignora `--delete-conflicting-outputs` → `dart run build_runner build`.
+  - Python no Windows: arquivos com `\r\n` → preserve o fim de linha ao editar por script; `PYTHONIOENCODING=utf-8` para imprimir acentos.
+- **Comportamento do app antigo:** `git show main:<caminho>` (ex.: `app/player-screen.tsx`, `contexts/PlayerContext.tsx`) como referência de comportamento, nunca de estrutura.
