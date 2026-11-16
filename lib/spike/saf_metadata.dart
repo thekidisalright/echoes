@@ -1,14 +1,14 @@
 // SPIKE — código descartável (Fase 0). Será removido no fim da fase.
-import 'dart:async';
 import 'dart:typed_data';
 
-import 'package:docman/docman.dart';
 import 'package:metadata_audio/metadata_audio.dart';
+
+import 'saf_native.dart';
 
 /// Lê metadados de um arquivo SAF sem carregar o arquivo inteiro:
 /// busca cabeçalho + final e, se o parser pedir bytes fora do que já foi
 /// lido, busca a janela que faltou e tenta de novo.
-Future<SafMetadataResult> readSafMetadata(DocumentFile file) async {
+Future<SafMetadataResult> readSafMetadata(SafNode file) async {
   final tokenizerSource = SafRangeSource(file);
   const headSize = 512 * 1024;
   const tailSize = 256 * 1024;
@@ -22,7 +22,7 @@ Future<SafMetadataResult> readSafMetadata(DocumentFile file) async {
     attempts++;
     final tokenizer = SparseTokenizer(
       tokenizerSource,
-      FileInfo(path: file.name, mimeType: file.type, size: file.size),
+      FileInfo(path: file.name, mimeType: file.mimeType, size: file.size),
     );
     try {
       final metadata = await parseFromTokenizer(tokenizer);
@@ -55,7 +55,7 @@ class SafMetadataResult {
 class SafRangeSource {
   SafRangeSource(this.file);
 
-  final DocumentFile file;
+  final SafNode file;
   final List<(int, Uint8List)> ranges = [];
 
   int get size => file.size;
@@ -65,27 +65,7 @@ class SafRangeSource {
     final s = start.clamp(0, size);
     final e = (start + length).clamp(0, size);
     if (e <= s || _covers(s, e - s)) return;
-    final builder = BytesBuilder(copy: false);
-    final completer = Completer<void>();
-    late final StreamSubscription<Uint8List> sub;
-    sub = file.readAsBytes(start: s, bufferSize: 64 * 1024).listen(
-      (chunk) {
-        builder.add(chunk);
-        if (builder.length >= e - s && !completer.isCompleted) {
-          unawaited(sub.cancel());
-          completer.complete();
-        }
-      },
-      onError: (Object error, StackTrace st) {
-        if (!completer.isCompleted) completer.completeError(error, st);
-      },
-      onDone: () {
-        if (!completer.isCompleted) completer.complete();
-      },
-    );
-    await completer.future;
-    final bytes = builder.takeBytes();
-    ranges.add((s, bytes.length > e - s ? bytes.sublist(0, e - s) : bytes));
+    ranges.add((s, await readRange(file.uri, s, e - s)));
   }
 
   bool _covers(int start, int length) => _find(start, length) != null;

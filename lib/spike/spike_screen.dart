@@ -7,6 +7,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:just_audio/just_audio.dart';
 
 import 'saf_metadata.dart';
+import 'saf_native.dart';
 
 const _audioExt = {'mp3', 'm4a', 'm4b'};
 const _imageExt = {'jpg', 'jpeg', 'png', 'webp'};
@@ -27,8 +28,8 @@ class _SpikeScreenState extends State<SpikeScreen> {
   final _player = AudioPlayer();
   final _log = <String>[];
   List<PersistedPermission> _perms = [];
-  List<DocumentFile> _audios = [];
-  List<DocumentFile> _images = [];
+  List<SafNode> _audios = [];
+  List<SafNode> _images = [];
   final List<(String, Uint8List)> _covers = [];
   bool _busy = false;
 
@@ -59,8 +60,7 @@ class _SpikeScreenState extends State<SpikeScreen> {
     }
   }
 
-  Future<void> _loadPerms() =>
-      _run('Permissões persistidas', _refreshPerms);
+  Future<void> _loadPerms() => _run('Permissões persistidas', _refreshPerms);
 
   Future<void> _refreshPerms() async {
     final perms = await DocMan.perms.list(files: false);
@@ -72,72 +72,82 @@ class _SpikeScreenState extends State<SpikeScreen> {
   }
 
   Future<void> _pickDir() => _run('Escolher pasta', () async {
-        final dir = await DocMan.pick.directory();
-        if (dir == null) {
-          _add('Seleção cancelada');
-          return;
-        }
-        _add('Pasta: ${dir.name} → ${dir.uri}');
-        await _refreshPerms();
-        await _scan(dir);
-      });
-
-  Future<void> _scanUri(String uri) => _run('Abrir pasta salva', () async {
-        final dir = await DocumentFile.fromUri(uri);
-        if (dir == null || !dir.exists) {
-          _add('Pasta indisponível: $uri');
-          return;
-        }
-        await _scan(dir);
-      });
-
-  Future<void> _scan(DocumentFile root) async {
-    final audios = <DocumentFile>[];
-    final images = <DocumentFile>[];
-    var dirs = 0;
-    Future<void> walk(DocumentFile dir) async {
-      dirs++;
-      for (final doc in await dir.listDocuments()) {
-        if (doc.isDirectory) {
-          await walk(doc);
-        } else if (_audioExt.contains(_ext(doc.name))) {
-          audios.add(doc);
-        } else if (_imageExt.contains(_ext(doc.name))) {
-          images.add(doc);
-        }
-      }
+    final dir = await DocMan.pick.directory();
+    if (dir == null) {
+      _add('Seleção cancelada');
+      return;
     }
+    _add('Pasta: ${dir.name} → ${dir.uri}');
+    await _refreshPerms();
+    await _scan(dir.uri);
+  });
 
+  Future<void> _scanUri(String uri) =>
+      _run('Abrir pasta salva', () => _scan(uri));
+
+  Future<void> _scan(String treeUri) async {
     final sw = Stopwatch()..start();
-    await walk(root);
+    final nodes = await listTree(treeUri);
+    final dirs = nodes.where((n) => n.isDirectory).length + 1;
+    final audios = nodes
+        .where((n) => !n.isDirectory && _audioExt.contains(_ext(n.name)))
+        .toList();
+    final images = nodes
+        .where((n) => !n.isDirectory && _imageExt.contains(_ext(n.name)))
+        .toList();
     setState(() {
       _audios = audios;
       _images = images;
     });
-    _add('Listagem: $dirs pastas, ${audios.length} áudios, '
-        '${images.length} imagens em ${sw.elapsedMilliseconds} ms');
+    _add(
+      'Listagem nativa: $dirs pastas, ${audios.length} áudios, '
+      '${images.length} imagens em ${sw.elapsedMilliseconds} ms',
+    );
   }
 
-  Future<void> _readMetadata(DocumentFile file) =>
-      _run('Metadados de ${file.name}', () async {
-        final r = await readSafMetadata(file);
-        final c = r.metadata.common;
-        final f = r.metadata.format;
-        _add('  título=${c.title} | álbum=${c.album} | artista=${c.artist} '
-            '| albumartist=${c.albumartist} | faixa=${c.track.no} '
-            '| duração=${f.duration?.toStringAsFixed(1)} s '
-            '| capítulos=${f.chapters?.length} '
-            '| capa=${c.picture?.isNotEmpty ?? false} '
-            '| tentativas=${r.attempts} '
-            '| lidos=${(r.bytesRead / 1024).round()} KB de '
-            '${(file.size / 1024).round()} KB');
-        final pic = c.picture?.firstOrNull;
-        if (pic != null) {
-          setState(
-            () => _covers.add((file.name, Uint8List.fromList(pic.data))),
-          );
-        }
-      });
+  Future<void> _readAll() => _run('Metadados de todos os áudios', () async {
+    var ok = 0;
+    var failed = 0;
+    var bytes = 0;
+    var withDuration = 0;
+    for (final a in _audios) {
+      try {
+        final r = await readSafMetadata(a);
+        ok++;
+        bytes += r.bytesRead;
+        if (r.metadata.format.duration != null) withDuration++;
+      } catch (_) {
+        failed++;
+      }
+    }
+    _add(
+      '  $ok ok, $failed falhas, $withDuration com duração, '
+      '${(bytes / 1024 / 1024).toStringAsFixed(1)} MB lidos',
+    );
+  });
+
+  Future<void> _readMetadata(SafNode file) => _run(
+    'Metadados de ${file.name}',
+    () async {
+      final r = await readSafMetadata(file);
+      final c = r.metadata.common;
+      final f = r.metadata.format;
+      _add(
+        '  título=${c.title} | álbum=${c.album} | artista=${c.artist} '
+        '| albumartist=${c.albumartist} | faixa=${c.track.no} '
+        '| duração=${f.duration?.toStringAsFixed(1)} s '
+        '| capítulos=${f.chapters?.length} '
+        '| capa=${c.picture?.isNotEmpty ?? false} '
+        '| tentativas=${r.attempts} '
+        '| lidos=${(r.bytesRead / 1024).round()} KB de '
+        '${(file.size / 1024).round()} KB',
+      );
+      final pic = c.picture?.firstOrNull;
+      if (pic != null) {
+        setState(() => _covers.add((file.name, Uint8List.fromList(pic.data))));
+      }
+    },
+  );
 
   Future<void> _readFirstOf(Set<String> exts) async {
     final file = _audios.where((a) => exts.contains(_ext(a.name))).firstOrNull;
@@ -149,16 +159,16 @@ class _SpikeScreenState extends State<SpikeScreen> {
   }
 
   Future<void> _playFirst() => _run('Tocar a partir de 1:00', () async {
-        // O maior arquivo, para garantir que 1:00 cabe na duração.
-        if (_audios.isEmpty) throw StateError('Nenhum áudio listado');
-        final file = _audios.reduce((a, b) => a.size >= b.size ? a : b);
-        final duration = await _player.setAudioSource(
-          AudioSource.uri(Uri.parse(file.uri)),
-          initialPosition: const Duration(minutes: 1),
-        );
-        _add('Carregado ${file.name}, duração do player: $duration');
-        unawaited(_player.play());
-      });
+    // O maior arquivo, para garantir que 1:00 cabe na duração.
+    if (_audios.isEmpty) throw StateError('Nenhum áudio listado');
+    final file = _audios.reduce((a, b) => a.size >= b.size ? a : b);
+    final duration = await _player.setAudioSource(
+      AudioSource.uri(Uri.parse(file.uri)),
+      initialPosition: const Duration(minutes: 1),
+    );
+    _add('Carregado ${file.name}, duração do player: $duration');
+    unawaited(_player.play());
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -183,6 +193,10 @@ class _SpikeScreenState extends State<SpikeScreen> {
               OutlinedButton(
                 onPressed: _busy ? null : () => _readFirstOf({'m4b', 'm4a'}),
                 child: const Text('3b. Metadados M4B'),
+              ),
+              OutlinedButton(
+                onPressed: _busy ? null : _readAll,
+                child: const Text('3c. Metadados de todos'),
               ),
               OutlinedButton(
                 onPressed: _busy ? null : _playFirst,

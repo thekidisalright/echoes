@@ -6,7 +6,10 @@ void main() {
   runApp(
     MaterialApp(
       title: 'Echoes',
-      theme: ThemeData(colorSchemeSeed: Colors.amber, brightness: Brightness.dark),
+      theme: ThemeData(
+        colorSchemeSeed: Colors.amber,
+        brightness: Brightness.dark,
+      ),
       home: const SpikeScreen(),
     ),
   );
