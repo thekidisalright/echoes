@@ -62,7 +62,8 @@ void main() {
   testWidgets('lista capítulos com número, nome e duração', (tester) async {
     await pump(tester);
     expect(find.text('Misery'), findsOneWidget);
-    expect(find.text(AppStrings.chaptersSection), findsOneWidget);
+    expect(find.text(AppStrings.chaptersTab), findsOneWidget);
+    expect(find.text(AppStrings.bookmarksTab(0)), findsOneWidget);
     expect(find.text('01'), findsOneWidget);
     expect(find.text('Parte 1'), findsOneWidget);
     expect(find.text('03:05'), findsWidgets);
@@ -77,11 +78,15 @@ void main() {
 
   testWidgets('sem marcadores mostra o texto de vazio', (tester) async {
     await pump(tester);
-    await tester.scrollUntilVisible(find.text(AppStrings.bookmarksEmpty), 300);
+    expect(find.text(AppStrings.bookmarksEmpty), findsNothing);
+    await tester.tap(find.text(AppStrings.bookmarksTab(0)));
+    await tester.pumpAndSettle();
     expect(find.text(AppStrings.bookmarksEmpty), findsOneWidget);
   });
 
-  testWidgets('marcador de capítulo removido', (tester) async {
+  testWidgets('aba de marcadores com contagem e capítulo removido', (
+    tester,
+  ) async {
     await pump(
       tester,
       bookmarks: [
@@ -94,7 +99,10 @@ void main() {
         ),
       ],
     );
-    await tester.scrollUntilVisible(find.text(AppStrings.chapterRemoved), 300);
+    // A aba mostra o total, sem rolar a lista de capítulos.
+    await tester.tap(find.text(AppStrings.bookmarksTab(1)));
+    await tester.pumpAndSettle();
+    expect(find.text(AppStrings.chapterRemoved), findsOneWidget);
     expect(find.text('12:34 · 16/11/2026'), findsOneWidget);
     expect(find.byTooltip(AppStrings.removeBookmark), findsOneWidget);
   });

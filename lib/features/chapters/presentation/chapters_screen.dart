@@ -18,9 +18,9 @@ import '../../library/domain/chapter.dart';
 import '../../player/domain/player_state.dart';
 import '../../player/presentation/player_providers.dart';
 
-/// Capítulos e marcadores do livro carregado no player.
+/// Capítulos e marcadores do livro carregado no player, em duas abas.
 ///
-/// Abre com o capítulo atual visível. Tocar num capítulo ou marcador leva o
+/// Abre na aba Capítulos, com o capítulo atual visível. Tocar num capítulo ou marcador leva o
 /// player até ele e volta ao Player.
 class ChaptersScreen extends ConsumerStatefulWidget {
   const ChaptersScreen({super.key});
@@ -82,100 +82,92 @@ class _ChaptersScreenState extends ConsumerState<ChaptersScreen> {
       _scrollToCurrent(state.chapterIndex);
     }
 
-    return Scaffold(
-      body: SafeArea(
-        child: Column(
-          children: [
-            Padding(
-              padding: EdgeInsets.fromLTRB(
-                padding,
-                AppSpacing.screenTop,
-                padding,
-                AppSpacing.lg,
+    return DefaultTabController(
+      length: 2,
+      child: Scaffold(
+        body: SafeArea(
+          child: Column(
+            children: [
+              Padding(
+                padding: EdgeInsets.fromLTRB(
+                  padding,
+                  AppSpacing.screenTop,
+                  padding,
+                  AppSpacing.sm,
+                ),
+                child: ScreenHeader(
+                  title: state.book?.title ?? AppStrings.chapters,
+                  subtitle: AppStrings.chaptersAndBookmarks,
+                ),
               ),
-              child: ScreenHeader(
-                title: state.book?.title ?? AppStrings.chapters,
-                subtitle: AppStrings.chaptersAndBookmarks,
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: padding),
+                child: TabBar(
+                  tabs: [
+                    const Tab(text: AppStrings.chaptersTab),
+                    Tab(text: AppStrings.bookmarksTab(bookmarks.length)),
+                  ],
+                ),
               ),
-            ),
-            Expanded(
-              child: CustomScrollView(
-                controller: _scroll,
-                slivers: [
-                  SliverPadding(
-                    padding: EdgeInsets.symmetric(horizontal: padding),
-                    sliver: SliverMainAxisGroup(
-                      slivers: [
-                        const _SectionTitle(AppStrings.chaptersSection),
-                        SliverFixedExtentList.builder(
-                          itemExtent: ChaptersScreen.chapterExtent,
-                          itemCount: state.chapters.length,
-                          itemBuilder: (context, index) => _ChapterTile(
-                            index: index,
-                            chapter: state.chapters[index],
-                            current: index == state.chapterIndex,
-                            onTap: () => _playChapter(index),
-                          ),
-                        ),
-                        const SliverToBoxAdapter(
-                          child: SizedBox(height: AppSpacing.xl),
-                        ),
-                        const _SectionTitle(AppStrings.bookmarksSection),
-                        if (bookmarks.isEmpty)
-                          const SliverToBoxAdapter(
-                            child: Padding(
-                              padding: EdgeInsets.symmetric(
-                                vertical: AppSpacing.lg,
-                              ),
-                              child: Text(
-                                AppStrings.bookmarksEmpty,
-                                style: AppTypography.bodySmall,
-                              ),
-                            ),
-                          )
-                        else
-                          SliverList.builder(
-                            itemCount: bookmarks.length,
-                            itemBuilder: (context, index) {
-                              final bookmark = bookmarks[index];
-                              return _BookmarkTile(
-                                key: ValueKey(bookmark.id),
-                                bookmark: bookmark,
-                                chapter: chapterById[bookmark.chapterId],
-                                onTap: () => _openBookmark(bookmark),
-                                onRemove: () => ref
-                                    .read(bookmarkRepositoryProvider)
-                                    .remove(bookmark.id),
-                              );
-                            },
-                          ),
-                        const SliverToBoxAdapter(
-                          child: SizedBox(height: AppSpacing.listBottom),
-                        ),
-                      ],
+              Expanded(
+                child: TabBarView(
+                  children: [
+                    ListView.builder(
+                      controller: _scroll,
+                      padding: EdgeInsets.fromLTRB(
+                        padding,
+                        AppSpacing.sm,
+                        padding,
+                        AppSpacing.listBottom,
+                      ),
+                      itemExtent: ChaptersScreen.chapterExtent,
+                      itemCount: state.chapters.length,
+                      itemBuilder: (context, index) => _ChapterTile(
+                        index: index,
+                        chapter: state.chapters[index],
+                        current: index == state.chapterIndex,
+                        onTap: () => _playChapter(index),
+                      ),
                     ),
-                  ),
-                ],
+                    if (bookmarks.isEmpty)
+                      Padding(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: padding,
+                          vertical: AppSpacing.xl,
+                        ),
+                        child: const Text(
+                          AppStrings.bookmarksEmpty,
+                          style: AppTypography.bodySmall,
+                        ),
+                      )
+                    else
+                      ListView.builder(
+                        padding: EdgeInsets.fromLTRB(
+                          padding,
+                          AppSpacing.sm,
+                          padding,
+                          AppSpacing.listBottom,
+                        ),
+                        itemCount: bookmarks.length,
+                        itemBuilder: (context, index) {
+                          final bookmark = bookmarks[index];
+                          return _BookmarkTile(
+                            key: ValueKey(bookmark.id),
+                            bookmark: bookmark,
+                            chapter: chapterById[bookmark.chapterId],
+                            onTap: () => _openBookmark(bookmark),
+                            onRemove: () => ref
+                                .read(bookmarkRepositoryProvider)
+                                .remove(bookmark.id),
+                          );
+                        },
+                      ),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
-      ),
-    );
-  }
-}
-
-class _SectionTitle extends StatelessWidget {
-  const _SectionTitle(this.text);
-
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    return SliverToBoxAdapter(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
-        child: Text(text, style: AppTypography.overline),
       ),
     );
   }

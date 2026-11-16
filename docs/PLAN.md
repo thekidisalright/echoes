@@ -127,7 +127,7 @@ Seguir `docs/FEATURES.md` e `docs/UI.md` à risca. Ordem:
 ## Fase 6 — Timer de sono, marcadores e acabamento
 
 - [x] `SleepTimerService`: por minutos (com tempo restante exposto) e fim de capítulo; folha inferior; cancelar.
-- [ ] Marcadores no Player (feedback "Salvo") e na tela de capítulos (ir para, remover).
+- [x] Marcadores no Player (feedback "Salvo") e na tela de capítulos (ir para, remover).
 - [ ] Animações de rota conforme `docs/UI.md` → Movimento.
 - [ ] Acessibilidade: `Semantics` com rótulos em todos os botões de ícone; ação de toque longo anunciada como "Editar audiobook"; áreas de toque ≥ 44.
 - [ ] Revisão de desempenho: biblioteca com 200+ livros rolando sem travar (capas com `cacheWidth`); importação de pasta grande não congela a UI (leitura de metadados fora da thread de UI se necessário).
@@ -202,3 +202,6 @@ Anote aqui toda decisão tomada durante a implementação que mude ou detalhe es
 | 2026-11-16 | 5 | Origem de arquivos soltos aparece em Gerenciar com o título atual do livro (`watchSources`); "Arquivos selecionados" fica como reserva | Escolha do usuário (opção a): as origens de arquivos não se distinguiam. Muda FEATURES §1.2 |
 | 2026-11-16 | 6 | Splash: medir a abertura no build release antes de decidir | Escolha do usuário; o debug (10,7 s) inclui JIT e não é representativo |
 | 2026-11-16 | 6 | `SleepTimerService` usa um `Timer` de relógio (até a troca do minuto exibido ou o disparo), com relógio e fábrica de timer injetáveis; fim do capítulo pausa quando o índice do capítulo muda (paridade: o capítulo seguinte chega a começar); abrir outro livro ou fechar o livro cancela | A regra 5 proíbe timers para esperar o player, não para medir tempo de relógio; testável sem `fake_async` |
+| 2026-11-16 | 6 | Player cabe numa tela sem rolar: a capa ocupa o espaço que sobrar (até o tamanho de antes); abaixo de 600 px de altura × escala da fonte, volta a rolar | No aparelho, a linha "Cancelar temporizador" ficava fora da tela |
+| 2026-11-16 | 6 | "Cancelar temporizador" sai do Player e vira "Desligar temporizador" dentro da folha, só com timer ativo | Escolha do usuário; muda FEATURES §3 |
+| 2026-11-16 | 6 | Tela de capítulos com abas "CAPÍTULOS" / "MARCADORES (n)" em vez de duas seções numa lista | Escolha do usuário: com muitos capítulos, os marcadores ficavam no fim de uma lista enorme. Muda FEATURES §5 |

@@ -94,6 +94,14 @@ ThemeData buildAppTheme() {
     textButtonTheme: TextButtonThemeData(
       style: TextButton.styleFrom(foregroundColor: AppColors.textSecondary),
     ),
+    tabBarTheme: const TabBarThemeData(
+      labelColor: AppColors.accent,
+      unselectedLabelColor: AppColors.textSecondary,
+      indicatorColor: AppColors.accent,
+      dividerColor: AppColors.border,
+      labelStyle: AppTypography.overline,
+      unselectedLabelStyle: AppTypography.overline,
+    ),
     snackBarTheme: const SnackBarThemeData(
       backgroundColor: AppColors.surface,
       contentTextStyle: AppTypography.bodySmall,

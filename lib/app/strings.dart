@@ -113,8 +113,9 @@ abstract final class AppStrings {
 
   // 5. Capítulos e marcadores
   static const chaptersAndBookmarks = 'Capítulos e marcadores';
-  static const chaptersSection = 'CAPÍTULOS';
-  static const bookmarksSection = 'MARCADORES SALVOS';
+  static const chaptersTab = 'CAPÍTULOS';
+  static String bookmarksTab(int count) =>
+      count == 0 ? 'MARCADORES' : 'MARCADORES ($count)';
   static const bookmarksEmpty = 'Os marcadores aparecem aqui.';
   static const chapterRemoved = 'Capítulo removido';
   static const removeBookmark = 'Remover marcador';

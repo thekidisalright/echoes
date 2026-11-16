@@ -102,9 +102,10 @@ Folha inferior "Temporizador" — "Quando deseja pausar?": 15, 30, 45, 60 minuto
 ## 5. Capítulos e marcadores
 
 - Cabeçalho com voltar, título do livro e subtítulo "Capítulos e marcadores".
-- Seção "CAPÍTULOS" (dourado, caixa alta, espaçado): número com 2 dígitos, nome (dourado se for o atual), duração à direita. Toque → toca esse capítulo do início e volta ao Player.
+- Duas abas sob o cabeçalho, "CAPÍTULOS" e "MARCADORES" (com o total, ex. "MARCADORES (3)"), em dourado, caixa alta, espaçado. Abre em Capítulos **(novo — antes eram duas seções numa lista só, e os marcadores ficavam depois de todos os capítulos)**.
+- Aba Capítulos: número com 2 dígitos, nome (dourado se for o atual), duração à direita. Toque → toca esse capítulo do início e volta ao Player.
 - **(novo)** A lista rola automaticamente até o capítulo atual ao abrir.
-- Seção "MARCADORES SALVOS": vazio → "Os marcadores aparecem aqui." Cada item: nome do capítulo ("Capítulo removido" se não existir mais), tempo e data; toque → vai ao capítulo e posição e volta ao Player; ícone de lixeira remove.
+- Aba Marcadores: vazio → "Os marcadores aparecem aqui." Cada item: nome do capítulo ("Capítulo removido" se não existir mais), tempo e data; toque → vai ao capítulo e posição e volta ao Player; ícone de lixeira remove.
 
 ---
 
