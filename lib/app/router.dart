@@ -84,14 +84,13 @@ GoRouter buildRouter() {
       ),
       GoRoute(
         path: AppRoutes.manage,
-        pageBuilder: (context, state) =>
-            _slidePage(
-              state,
-              ManageLibraryScreen(
-                notice: (state.extra as ManageLibraryArgs?)?.notice,
-              ),
-              begin: _fromRight,
-            ),
+        pageBuilder: (context, state) => _slidePage(
+          state,
+          ManageLibraryScreen(
+            notice: (state.extra as ManageLibraryArgs?)?.notice,
+          ),
+          begin: _fromRight,
+        ),
       ),
       GoRoute(
         path: AppRoutes.settings,

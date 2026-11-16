@@ -10,6 +10,7 @@ import '../../../app/theme/spacing.dart';
 import '../../../app/theme/typography.dart';
 import '../../import/presentation/widgets/import_status_banner.dart';
 import '../../player/presentation/player_providers.dart';
+import '../../player/presentation/widgets/mini_player.dart';
 import '../../settings/presentation/settings_providers.dart';
 import '../domain/sort_order.dart';
 import 'library_providers.dart';
@@ -50,99 +51,111 @@ class LibraryScreen extends ConsumerWidget {
     final itemWidth =
         (width - padding * 2 - _gridSpacing * (columns - 1)) / columns;
 
-    return Scaffold(
-      body: SafeArea(
-        bottom: false,
-        child: CustomScrollView(
-          slivers: [
-            SliverPadding(
-              padding: EdgeInsets.fromLTRB(
-                padding,
-                AppSpacing.screenTop,
-                padding,
-                0,
-              ),
-              sliver: SliverList.list(
-                children: [
-                  const _Header(),
-                  const SizedBox(height: AppSpacing.xl),
-                  const ImportStatusBanner(),
-                  if (recent.isNotEmpty) ...[
-                    const Text(
-                      AppStrings.continueListening,
-                      style: AppTypography.sectionTitle,
-                    ),
-                    const SizedBox(height: AppSpacing.sm),
-                    const _ContinueListening(),
-                    const SizedBox(height: AppSpacing.xxl),
-                  ],
-                  SearchField(
-                    initialValue: query,
-                    onChanged: ref.read(librarySearchProvider.notifier).set,
+    final scroll = SafeArea(
+      bottom: false,
+      child: CustomScrollView(
+        slivers: [
+          SliverPadding(
+            padding: EdgeInsets.fromLTRB(
+              padding,
+              AppSpacing.screenTop,
+              padding,
+              0,
+            ),
+            sliver: SliverList.list(
+              children: [
+                const _Header(),
+                const SizedBox(height: AppSpacing.xl),
+                const ImportStatusBanner(),
+                if (recent.isNotEmpty) ...[
+                  const Text(
+                    AppStrings.continueListening,
+                    style: AppTypography.sectionTitle,
                   ),
-                  const SizedBox(height: AppSpacing.xl),
-                  Row(
-                    children: [
-                      const Expanded(
-                        child: Text(
-                          AppStrings.library,
-                          style: AppTypography.sectionTitle,
-                        ),
-                      ),
-                      SortChips(
-                        value: sort,
-                        onChanged: (order) => ref
-                            .read(settingsRepositoryProvider)
-                            .setLibrarySort(order),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: AppSpacing.md),
+                  const SizedBox(height: AppSpacing.sm),
+                  const _ContinueListening(),
+                  const SizedBox(height: AppSpacing.xxl),
                 ],
-              ),
+                SearchField(
+                  initialValue: query,
+                  onChanged: ref.read(librarySearchProvider.notifier).set,
+                ),
+                const SizedBox(height: AppSpacing.xl),
+                Row(
+                  children: [
+                    const Expanded(
+                      child: Text(
+                        AppStrings.library,
+                        style: AppTypography.sectionTitle,
+                      ),
+                    ),
+                    SortChips(
+                      value: sort,
+                      onChanged: (order) => ref
+                          .read(settingsRepositoryProvider)
+                          .setLibrarySort(order),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: AppSpacing.md),
+              ],
             ),
-            if (books == null)
-              const SliverToBoxAdapter(child: SizedBox.shrink())
-            else if (books.isEmpty)
-              SliverToBoxAdapter(
-                child: EmptyState(
-                  searching: query.trim().isNotEmpty,
-                  onManage: () => context.push(AppRoutes.manage),
-                ),
-              )
-            else
-              SliverPadding(
-                padding: EdgeInsets.symmetric(horizontal: padding),
-                sliver: SliverGrid.builder(
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: columns,
-                    crossAxisSpacing: _gridSpacing,
-                    mainAxisSpacing: _gridRunSpacing,
-                    childAspectRatio: BookGridItem.aspectRatioFor(itemWidth),
-                  ),
-                  itemCount: books.length,
-                  itemBuilder: (context, index) {
-                    final summary = books[index];
-                    return BookGridItem(
-                      key: ValueKey(summary.book.id),
-                      summary: summary,
-                      onTap: () => openBookAndShowPlayer(context, ref, summary),
-                      // Diálogo de edição: Fase 5.6.
-                      onLongPress: () {},
-                    );
-                  },
-                ),
-              ),
+          ),
+          if (books == null)
+            const SliverToBoxAdapter(child: SizedBox.shrink())
+          else if (books.isEmpty)
             SliverToBoxAdapter(
-              child: SizedBox(
-                height:
-                    MediaQuery.paddingOf(context).bottom +
-                    (hasBook ? AppSpacing.miniPlayerClearance : 0) +
-                    AppSpacing.listBottom,
+              child: EmptyState(
+                searching: query.trim().isNotEmpty,
+                onManage: () => context.push(AppRoutes.manage),
+              ),
+            )
+          else
+            SliverPadding(
+              padding: EdgeInsets.symmetric(horizontal: padding),
+              sliver: SliverGrid.builder(
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: columns,
+                  crossAxisSpacing: _gridSpacing,
+                  mainAxisSpacing: _gridRunSpacing,
+                  childAspectRatio: BookGridItem.aspectRatioFor(itemWidth),
+                ),
+                itemCount: books.length,
+                itemBuilder: (context, index) {
+                  final summary = books[index];
+                  return BookGridItem(
+                    key: ValueKey(summary.book.id),
+                    summary: summary,
+                    onTap: () => openBookAndShowPlayer(context, ref, summary),
+                    // Diálogo de edição: Fase 5.6.
+                    onLongPress: () {},
+                  );
+                },
               ),
             ),
-          ],
-        ),
+          SliverToBoxAdapter(
+            child: SizedBox(
+              height:
+                  MediaQuery.paddingOf(context).bottom +
+                  (hasBook ? AppSpacing.miniPlayerClearance : 0) +
+                  AppSpacing.listBottom,
+            ),
+          ),
+        ],
+      ),
+    );
+
+    return Scaffold(
+      body: Stack(
+        children: [
+          scroll,
+          Positioned(
+            left: AppSpacing.lg,
+            right: AppSpacing.lg,
+            bottom: MediaQuery.paddingOf(context).bottom + AppSpacing.xl,
+            child: const MiniPlayer(),
+          ),
+        ],
       ),
     );
   }

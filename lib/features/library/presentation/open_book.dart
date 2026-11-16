@@ -29,9 +29,9 @@ Future<void> openBookAndShowPlayer(
   } on Exception catch (e) {
     debugPrint('Falha ao abrir o livro ${summary.book.id}: $e');
     if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text(AppStrings.openBookError)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text(AppStrings.openBookError)));
     }
     return;
   }

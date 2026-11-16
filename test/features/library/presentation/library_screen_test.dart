@@ -46,9 +46,7 @@ void main() {
       ProviderScope(
         overrides: [
           libraryBooksProvider.overrideWith((ref) => Stream.value(books)),
-          continueListeningProvider.overrideWith(
-            (ref) => Stream.value(recent),
-          ),
+          continueListeningProvider.overrideWith((ref) => Stream.value(recent)),
           librarySortProvider.overrideWith(
             (ref) => Stream.value(SortOrder.recent),
           ),
@@ -75,9 +73,7 @@ void main() {
     expect(find.text(AppStrings.continueListening), findsNothing);
   });
 
-  testWidgets('busca sem resultado mostra "Nenhum resultado"', (
-    tester,
-  ) async {
+  testWidgets('busca sem resultado mostra "Nenhum resultado"', (tester) async {
     await pump(tester, query: 'xyz');
     expect(find.text(AppStrings.noResults), findsOneWidget);
     expect(find.text(AppStrings.emptyLibraryTitle), findsNothing);
@@ -106,11 +102,7 @@ void main() {
       tester,
       books: [misery],
       recent: [misery],
-      player: PlayerState(
-        book: misery.book,
-        chapters: const [],
-        playing: true,
-      ),
+      player: PlayerState(book: misery.book, chapters: const [], playing: true),
     );
     expect(find.text(AppStrings.continueListening), findsOneWidget);
     expect(

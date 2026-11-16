@@ -33,7 +33,8 @@ class ContinueListeningItem extends StatelessWidget {
     final title = book.title.isEmpty ? AppStrings.untitled : book.title;
     return Semantics(
       button: true,
-      label: '${AppStrings.listenTo(title)}, '
+      label:
+          '${AppStrings.listenTo(title)}, '
           '${playing ? AppStrings.nowPlaying : AppStrings.recentlyPlayed}',
       excludeSemantics: true,
       child: InkWell(

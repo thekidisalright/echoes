@@ -68,9 +68,8 @@ void main() {
     await pumpApp(tester);
     // Sem livro carregado não há MiniPlayer: abre a rota direto.
     unawaited(
-      GoRouter.of(
-        tester.element(find.byType(LibraryScreen)),
-      ).push(AppRoutes.player),
+      GoRouter.of(tester.element(find.byType(LibraryScreen)))
+          .push(AppRoutes.player),
     );
     await tester.pumpAndSettle();
     expect(find.byTooltip(AppStrings.closePlayer), findsOneWidget);
