@@ -5,7 +5,7 @@ Instruções para o Claude Code trabalhar neste repositório.
 ## Contexto
 
 Echoes é um player de audiobooks pessoal, **apenas Android**, para arquivos locais.
-Esta branch (`flutter-rewrite`) recria do zero em Flutter o app que existia em React Native/Expo (branch `main`).
+O app foi recriado do zero em Flutter (branch `flutter-rewrite`, levada à `main`) a partir do app que existia em React Native/Expo. O código antigo está preservado na tag `rn-legacy`.
 Não há migração de dados: o app novo começa com a biblioteca vazia.
 
 Antes de qualquer trabalho, leia nesta ordem:
@@ -22,7 +22,7 @@ Antes de qualquer trabalho, leia nesta ordem:
 - Um commit por tarefa ou grupo coeso de tarefas, mensagens no padrão Conventional Commits em português:
   `feat(player): retomar posição ao abrir livro`, `fix(import): ...`, `chore: ...`, `docs: ...`.
 - Se uma decisão do plano se mostrar inviável (ex.: pacote não funciona com URIs `content://`), **pare, explique o problema e proponha alternativa** antes de trocar. Depois registre a decisão na seção "Registro de decisões" de `docs/PLAN.md`.
-- Para lembrar como algo funcionava na versão antiga: `git show main:<caminho>` (ex.: `git show main:contexts/PlayerContext.tsx`). Use como referência de **comportamento**, nunca como modelo de estrutura.
+- Para lembrar como algo funcionava na versão antiga: `git show rn-legacy:<caminho>` (ex.: `git show rn-legacy:contexts/PlayerContext.tsx`). Use como referência de **comportamento**, nunca como modelo de estrutura.
 
 ## Comandos
 

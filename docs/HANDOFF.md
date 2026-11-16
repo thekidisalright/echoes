@@ -5,12 +5,12 @@
 
 ## 1. Objetivo
 
-Reescrever do zero, em Flutter, o **Echoes**, um player pessoal de audiobooks para arquivos locais, só para Android. O app antigo, em React Native/Expo, fica na branch `main` apenas como referência de comportamento. A reescrita segue as fases de `docs/PLAN.md`. Com o aceite da Fase 6, a paridade está completa; o que resta no plano são extras opcionais.
+Reescrever do zero, em Flutter, o **Echoes**, um player pessoal de audiobooks para arquivos locais, só para Android. O app antigo, em React Native/Expo, fica na tag `rn-legacy` (`6b13daf`) apenas como referência de comportamento. A reescrita segue as fases de `docs/PLAN.md`. Com o aceite da Fase 6, a paridade está completa; o que resta no plano são extras opcionais.
 
 ## 2. Contexto essencial
 
 **Repositório e ambiente**
-- Repo: `C:\alex\echoes`, branch de trabalho **`flutter-rewrite`**. A `main` não deve ser alterada.
+- Repo: `C:\alex\echoes`, branch de trabalho **`flutter-rewrite`**, enviada à `main` por pull request depois do aceite da Fase 6. `gh` instalado e autenticado (se não estiver no PATH: `export PATH="$PATH:/c/Program Files/GitHub CLI"`).
 - Sistema: Windows 11. Shell principal PowerShell 5.1; também há Git Bash. **Não há `gh`**. O Python não tem Pillow, mas tem `sqlite3`. Para imprimir texto com acentos no Python, use `PYTHONIOENCODING=utf-8` (o console é cp1252).
 - Flutter **3.50.0** stable (Dart 3.14) em `C:\Users\santo\develop\flutter`. Carregue o PATH em PowerShell antes:
   `$env:Path = [Environment]::GetEnvironmentVariable('Path','Machine') + ';' + [Environment]::GetEnvironmentVariable('Path','User')`
@@ -26,7 +26,7 @@ Reescrever do zero, em Flutter, o **Echoes**, um player pessoal de audiobooks pa
   | debug | `dev.alexandre.echoes.debug` | debug | sim |
   | profile | `dev.alexandre.echoes.profile` | debug | sim |
 
-  Hoje estão instalados o **release** (biblioteca real do usuário) e o **profile** (com 250 livros de teste).
+  Hoje só o **release** (biblioteca real do usuário) está instalado; o profile com 250 livros de teste foi desinstalado.
 - **Assinatura:** `android/key.properties` (ignorado pelo git) aponta para a keystore em `C:/Users/santo/.android-keys/echoes-release.jks`, alias `echoes`. **As senhas são do usuário: nunca leia, imprima nem digite.** Para conferir sem expor: `grep -o "^[a-zA-Z]*=" android/key.properties`. Sem o arquivo, o release cai na chave de debug com um aviso do Gradle (o Flutter esconde esse aviso).
 - **Tempos medidos:** `flutter build apk --release --split-per-abi --target-platform android-arm64` levou 180–314 s; o APK com todas as ABIs, 447 s (60,3 MB, contra 21,3 MB só arm64). Build debug: 62–104 s. `flutter test`: 30–95 s.
 
@@ -99,12 +99,11 @@ Reescrever do zero, em Flutter, o **Echoes**, um player pessoal de audiobooks pa
 
 1. **Depende do usuário:** decidir se começa a Fase 7 ou encerra a reescrita aqui.
 2. **Depende do usuário:** push dos commits locais.
-3. Acrescentar `android/build/` ao `.gitignore` (commit `chore:`). Aceite: `git status --short` vazio depois de um build.
+3. Conferir que o PR `flutter-rewrite` → `main` foi mesclado pelo usuário.
 4. Se a Fase 7 começar, escreva o resumo da abordagem e siga a ordem do PLAN:
    1. Velocidade de reprodução por livro: coluna `playbackSpeed` em `books` e migração para `schemaVersion = 2`.
    2. Capítulos internos de M4B (`startMs`/`endMs`; o handler recorta a fonte por capítulo). *Fire & Blood* no aparelho é um M4B com 1 capítulo e serve de teste.
    3. Marcar como concluído e filtro de concluídos.
-5. **Depende do usuário:** desinstalar o app profile (`dev.alexandre.echoes.profile`) quando não precisar mais dos 250 livros de teste.
 
 ## 6. Perguntas em aberto
 
@@ -113,7 +112,7 @@ Reescrever do zero, em Flutter, o **Echoes**, um player pessoal de audiobooks pa
 - **Cache de capa ao reimportar:** reescanear sobrescreve `sha1(bookId).jpg` no mesmo caminho, e o `FileImage` pode mostrar a capa antiga até reiniciar o app. Opções: `FileImage(...).evict()` depois de importar, ou timestamp no nome da capa escaneada (as capas personalizadas já usam timestamp). Não foi observado no aparelho.
 - **Textos inventados** ainda sem revisão: `sourceUnavailableHint`, `defaultFolderName` ("Pasta de áudio"), `openBookError`, `editBookError` e rótulos de acessibilidade.
 - **"1 capítulos"** na grade (*Fire & Blood*): o texto vem do FEATURES e do app antigo; correção trivial se o usuário quiser.
-- **Duplicatas entre origens**, **aviso do Kotlin Gradle Plugin** (plugins que aplicam KGP; futuras versões do Flutter vão falhar o build) e **merge na `main`**: sem mudança.
+- **Duplicatas entre origens**, e **aviso do Kotlin Gradle Plugin** (plugins que aplicam KGP; futuras versões do Flutter vão falhar o build): sem mudança.
 
 ## 7. Artefatos relevantes
 
@@ -156,7 +155,6 @@ BT=$(ls -d "$LOCALAPPDATA"/Android/Sdk/build-tools/* | tail -1)
 
 **Dados no aparelho**
 - Release: biblioteca real do usuário (`Download/Audiobooks` em "Cada pasta é um livro" e outras origens criadas no aceite).
-- Profile: 250 livros (3 reais multiplicados), 20 336 capítulos, 167 capas.
 - `Download/Audiobooks`: *Fire & Blood* (M4B, 1 capítulo), *A Guerra dos Tronos* (185 MP3), *Misery* (59 MP3, sem capa). O título de *Misery* vem com um caractere errado ("Obsess" + caractere chinês): **o defeito está no próprio arquivo, não no app** (confirmado pelo usuário).
 
 ## 8. Instruções para a próxima sessão
@@ -181,4 +179,4 @@ BT=$(ls -d "$LOCALAPPDATA"/Android/Sdk/build-tools/* | tail -1)
   - `package:flutter/material.dart` está obsoleto → `package:material_ui/material_ui.dart`. Ícones do `ionicons` em camelCase.
   - `build_runner` 2.17 ignora `--delete-conflicting-outputs` → `dart run build_runner build`.
   - Python no Windows: arquivos com `\r\n` → preserve o fim de linha ao editar por script; `PYTHONIOENCODING=utf-8` para imprimir acentos.
-- **Comportamento do app antigo:** `git show main:<caminho>` (ex.: `app/player-screen.tsx`, `contexts/PlayerContext.tsx`) como referência de comportamento, nunca de estrutura.
+- **Comportamento do app antigo:** `git show rn-legacy:<caminho>` (ex.: `app/player-screen.tsx`, `contexts/PlayerContext.tsx`) como referência de comportamento, nunca de estrutura.
