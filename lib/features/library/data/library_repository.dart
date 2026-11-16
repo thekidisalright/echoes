@@ -183,18 +183,29 @@ class LibraryRepository {
   );
 
   /// Origens com a contagem de livros, por nome.
+  ///
+  /// Uma origem de arquivos soltos é um livro só e aparece com o título
+  /// atual dele (editado ou lido), para distinguir uma origem da outra.
   Stream<List<LibrarySource>> watchSources() {
     return _db
         .customSelect(
-          'SELECT s.*, (SELECT COUNT(*) FROM books b '
-          'WHERE b.source_id = s.id) AS book_count FROM sources s',
+          'SELECT s.*, '
+          '(SELECT COUNT(*) FROM books b WHERE b.source_id = s.id) '
+          'AS book_count, '
+          "(SELECT NULLIF(TRIM(COALESCE(b.custom_title, b.scanned_title)), '') "
+          'FROM books b WHERE b.source_id = s.id LIMIT 1) AS book_title '
+          'FROM sources s',
           readsFrom: {_db.sources, _db.books},
         )
         .watch()
         .map(
           (rows) => [
             for (final row in rows)
-              _toSource(_db.sources.map(row.data), row.read<int>('book_count')),
+              _toSource(
+                _db.sources.map(row.data),
+                row.read<int>('book_count'),
+                filesTitle: row.readNullable<String>('book_title'),
+              ),
           ]..sort((a, b) => compareNatural(a.name, b.name)),
         );
   }
@@ -352,18 +363,28 @@ class LibraryRepository {
     end: _duration(row.endMs),
   );
 
-  static LibrarySource _toSource(SourceRow row, int bookCount) => LibrarySource(
-    id: row.id,
-    uri: row.uri,
-    name: row.name,
-    kind: SourceKind.values.byName(row.kind),
-    importMode: row.importMode == null
-        ? null
-        : ImportMode.values.byName(row.importMode!),
-    available: row.available,
-    lastScannedAt: DateTime.fromMillisecondsSinceEpoch(row.lastScannedAt),
-    bookCount: bookCount,
-  );
+  /// [filesTitle]: título do livro, usado como nome das origens de arquivos.
+  static LibrarySource _toSource(
+    SourceRow row,
+    int bookCount, {
+    String? filesTitle,
+  }) {
+    final kind = SourceKind.values.byName(row.kind);
+    return LibrarySource(
+      id: row.id,
+      uri: row.uri,
+      name: kind == SourceKind.files && filesTitle != null
+          ? filesTitle
+          : row.name,
+      kind: kind,
+      importMode: row.importMode == null
+          ? null
+          : ImportMode.values.byName(row.importMode!),
+      available: row.available,
+      lastScannedAt: DateTime.fromMillisecondsSinceEpoch(row.lastScannedAt),
+      bookCount: bookCount,
+    );
+  }
 
   static Duration? _duration(int? ms) =>
       ms == null ? null : Duration(milliseconds: ms);

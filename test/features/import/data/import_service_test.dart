@@ -146,7 +146,8 @@ void main() {
       final source = (await library.watchSources().first).single;
       expect(source.id, 'files:1000');
       expect(source.kind, SourceKind.files);
-      expect(source.name, 'Arquivos selecionados');
+      // Em Gerenciar, a origem de arquivos mostra o título do livro.
+      expect(source.name, (await library.getBook('files:1000'))!.title);
       final chapters = await library.chaptersOf('files:1000');
       expect([for (final c in chapters) c.uri], ['doc:01.mp3', 'doc:02.mp3']);
 

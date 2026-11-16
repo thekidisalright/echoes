@@ -18,7 +18,7 @@ Textos entre aspas são os textos de UI exatos (vão para `lib/app/strings.dart`
 5. Erro → "Não foi possível importar a pasta" / "Verifique o acesso à pasta e tente selecioná-la novamente."
 
 ### 1.2 Adicionar arquivos
-- Seletor de múltiplos arquivos de áudio. Todos os arquivos selecionados viram **um** livro, origem `files:<epochMs>`, nome "Arquivos selecionados".
+- Seletor de múltiplos arquivos de áudio. Todos os arquivos selecionados viram **um** livro, origem `files:<epochMs>`. Em Gerenciar, a origem aparece com o título atual do livro **(novo — antes todas se chamavam "Arquivos selecionados", que continua como nome de reserva)**.
 - Nenhum áudio → "Nenhum áudio selecionado" / "Escolha arquivos MP3, M4A ou M4B."
 - Todos já existem → "Arquivos já adicionados" / "Todos os arquivos selecionados já estão na biblioteca."
 - Erro → "Não foi possível adicionar os arquivos" / "Escolha novamente os arquivos de áudio."

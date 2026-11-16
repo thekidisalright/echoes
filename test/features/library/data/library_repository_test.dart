@@ -1,6 +1,7 @@
 import 'package:echoes/core/database/app_database.dart';
 import 'package:echoes/features/bookmarks/data/bookmark_repository.dart';
 import 'package:echoes/features/import/domain/import_mode.dart';
+import 'package:echoes/features/import/domain/scanned_source.dart';
 import 'package:echoes/features/library/data/library_repository.dart';
 import 'package:echoes/features/library/domain/library_source.dart';
 import 'package:echoes/features/library/domain/sort_order.dart';
@@ -198,6 +199,32 @@ void main() {
         expect([for (final m in marks) m.chapterId], ['f:2']);
       },
     );
+  });
+
+  test('origem de arquivos aparece com o título atual do livro', () async {
+    ScannedSource files(String id, String title) => ScannedSource(
+      id: id,
+      uri: id,
+      name: 'Arquivos selecionados',
+      kind: SourceKind.files,
+      books: [
+        book('$id:book', [chapter('$id:f')], title: title),
+      ],
+    );
+    await library.saveScannedSource(files('files:1', 'Misery'));
+    await library.saveScannedSource(files('files:2', 'Carrie'));
+    await library.saveScannedSource(
+      folder('tree:a', [
+        book('dir:1', [chapter('f:1')], title: 'Livro'),
+      ], name: 'Audiobooks'),
+    );
+
+    var names = [for (final s in await library.watchSources().first) s.name];
+    expect(names, ['Audiobooks', 'Carrie', 'Misery']);
+
+    await library.updateBookDetails('files:2:book', title: 'Zebra', author: '');
+    names = [for (final s in await library.watchSources().first) s.name];
+    expect(names, ['Audiobooks', 'Misery', 'Zebra']);
   });
 
   test('remover origem apaga livros, capítulos, progresso e marcadores '
