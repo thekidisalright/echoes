@@ -1,5 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'app_info/app_info.dart';
+import 'app_info/package_app_info.dart';
 import 'database/app_database.dart';
 import 'files/cover_store.dart';
 import 'images/image_gateway.dart';
@@ -32,3 +34,5 @@ final coverStoreProvider = Provider<CoverStore>(
 final imageGatewayProvider = Provider<ImageGateway>(
   (ref) => ImagePickerGateway(),
 );
+
+final appInfoProvider = Provider<AppInfo>((ref) => PackageAppInfo());

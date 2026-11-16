@@ -12,3 +12,8 @@ final settingsRepositoryProvider = Provider<SettingsRepository>(
 final librarySortProvider = StreamProvider<SortOrder>(
   (ref) => ref.watch(settingsRepositoryProvider).watchLibrarySort(),
 );
+
+/// Versão do app para a seção "Sobre".
+final appVersionProvider = FutureProvider<String>(
+  (ref) => ref.watch(appInfoProvider).version(),
+);

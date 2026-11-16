@@ -48,6 +48,7 @@ dependencies:
   ionicons: ^0.2.3
   crypto: ^3.0.8
   rxdart: ^0.28.0
+  package_info_plus: ^10.2.2
 
 dev_dependencies:
   flutter_test:
