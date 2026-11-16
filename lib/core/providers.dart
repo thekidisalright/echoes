@@ -2,6 +2,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'database/app_database.dart';
 import 'files/cover_store.dart';
+import 'images/image_gateway.dart';
+import 'images/image_picker_gateway.dart';
 import 'metadata/metadata_audio_reader.dart';
 import 'metadata/metadata_reader.dart';
 import 'storage/saf_storage_gateway.dart';
@@ -25,4 +27,8 @@ final metadataReaderProvider = Provider<MetadataReader>(
 
 final coverStoreProvider = Provider<CoverStore>(
   (ref) => CoverStore.appSupport(),
+);
+
+final imageGatewayProvider = Provider<ImageGateway>(
+  (ref) => ImagePickerGateway(),
 );

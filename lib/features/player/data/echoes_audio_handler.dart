@@ -76,6 +76,14 @@ class EchoesAudioHandler extends BaseAudioHandler with SeekHandler {
     _publishMediaItem(index);
   }
 
+  /// Troca os textos e a capa da fila sem recarregar o áudio (o livro foi
+  /// editado). Ignorado se a fila mudou de tamanho.
+  void updateItems(List<MediaItem> items) {
+    if (items.length != queue.value.length) return;
+    queue.add(items);
+    _publishMediaItem(_player.currentIndex);
+  }
+
   /// Descarrega o livro e esconde a notificação.
   Future<void> unload() async {
     await _player.stop();

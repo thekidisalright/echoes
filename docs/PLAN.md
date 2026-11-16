@@ -115,7 +115,7 @@ Seguir `docs/FEATURES.md` e `docs/UI.md` à risca. Ordem:
 - [x] 5.3 MiniPlayer (com barra de progresso fina).
 - [x] 5.4 Player: capa, textos, SeekBar, controles, linha de ações, gesto de arrastar para fechar.
 - [x] 5.5 Capítulos e marcadores (com rolagem até o capítulo atual).
-- [ ] 5.6 Diálogo de edição de livro (capa via `image_picker` + `CoverStore`, restaurar dados originais).
+- [x] 5.6 Diálogo de edição de livro (capa via `image_picker` + `CoverStore`, restaurar dados originais).
 - [ ] 5.7 Configurações (ordenação + Sobre).
 
 **Aceite:** todos os fluxos de `docs/FEATURES.md` §1–§7 executáveis no aparelho; sem textos fora de `strings.dart`; sem cores fora de `colors.dart`.

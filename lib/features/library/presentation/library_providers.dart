@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/providers.dart';
 import '../../settings/presentation/settings_providers.dart';
+import '../data/book_editor.dart';
 import '../data/library_repository.dart';
 import '../domain/book_summary.dart';
 import '../domain/library_source.dart';
@@ -9,6 +10,13 @@ import '../domain/sort_order.dart';
 
 final libraryRepositoryProvider = Provider<LibraryRepository>(
   (ref) => LibraryRepository(ref.watch(appDatabaseProvider)),
+);
+
+final bookEditorProvider = Provider<BookEditor>(
+  (ref) => BookEditor(
+    library: ref.watch(libraryRepositoryProvider),
+    covers: ref.watch(coverStoreProvider),
+  ),
 );
 
 /// Texto do campo de busca da biblioteca.

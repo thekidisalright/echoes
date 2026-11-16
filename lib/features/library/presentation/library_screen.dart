@@ -15,6 +15,7 @@ import '../../settings/presentation/settings_providers.dart';
 import '../domain/sort_order.dart';
 import 'library_providers.dart';
 import 'open_book.dart';
+import 'widgets/book_edit_dialog.dart';
 import 'widgets/book_grid_item.dart';
 import 'widgets/continue_listening_item.dart';
 import 'widgets/empty_state.dart';
@@ -127,8 +128,8 @@ class LibraryScreen extends ConsumerWidget {
                     key: ValueKey(summary.book.id),
                     summary: summary,
                     onTap: () => openBookAndShowPlayer(context, ref, summary),
-                    // Diálogo de edição: Fase 5.6.
-                    onLongPress: () {},
+                    onLongPress: () =>
+                        showBookEditDialog(context, summary.book),
                   );
                 },
               ),

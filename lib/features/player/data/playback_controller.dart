@@ -121,6 +121,19 @@ class PlaybackController {
     if (!await openBook(id)) await _settings.setLastPlayedBookId(null);
   }
 
+  /// Relê título, autor e capa do livro carregado, se for [bookId] (o
+  /// usuário editou o livro). Não interrompe a reprodução.
+  Future<void> refreshBook(String bookId) async {
+    final loaded = _book.value;
+    if (loaded == null || loaded.book.id != bookId) return;
+    final book = await _library.getBook(bookId);
+    if (book == null || _book.value?.book.id != bookId) return;
+    _book.add(_LoadedBook(book, loaded.chapters));
+    _handler.updateItems([
+      for (final c in loaded.chapters) _mediaItem(book, c),
+    ]);
+  }
+
   /// Salva e descarrega o livro atual (ex.: a origem dele foi removida).
   Future<void> close() async {
     await _saver.flush();

@@ -81,6 +81,7 @@ abstract final class AppStrings {
   static const titleLabel = 'Título';
   static const authorLabel = 'Autor';
   static const restoreOriginal = 'Restaurar dados originais';
+  static const editBookError = 'Não foi possível salvar as alterações.';
 
   // 3. Player
   static const closePlayer = 'Fechar player';
