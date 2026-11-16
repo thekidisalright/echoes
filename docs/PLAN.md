@@ -30,11 +30,11 @@ Objetivo: provar que as três peças de plataforma funcionam juntas **antes** de
 
 ### 0.2 Spike (código descartável em `lib/spike/`, removido no fim da fase)
 - [x] Adicionar `docman`, `metadata_audio`, `just_audio`.
-- [ ] Botão que escolhe uma pasta via SAF com permissão persistente.
-- [ ] Listar recursivamente os `.mp3/.m4a/.m4b` e imagens da pasta.
-- [ ] Ler metadados (título, álbum, artista, faixa, duração, capa embutida) de um `.mp3` e de um `.m4b` **a partir da URI `content://`**.
-- [ ] Tocar o primeiro arquivo com just_audio a partir da URI e fazer seek para 1:00.
-- [ ] Fechar e reabrir o app: a permissão da pasta continua válida e a listagem funciona sem escolher de novo.
+- [x] Botão que escolhe uma pasta via SAF com permissão persistente.
+- [x] Listar recursivamente os `.mp3/.m4a/.m4b` e imagens da pasta.
+- [ ] Ler metadados (título, álbum, artista, faixa, duração, capa embutida) de um `.mp3` e de um `.m4b` **a partir da URI `content://`**. *(MP3 validado: 244 arquivos, 0 falhas; falta um `.m4b` com tags e capa)*
+- [x] Tocar o primeiro arquivo com just_audio a partir da URI e fazer seek para 1:00. *(usa o maior arquivo, já que o primeiro tinha 18 s)*
+- [x] Fechar e reabrir o app: a permissão da pasta continua válida e a listagem funciona sem escolher de novo.
 
 **Se algo falhar:**
 - `metadata_audio` não aceita URI/stream → testar `flutter_taglib`; se nenhum aceitar, ler via stream os primeiros ~512 KB (cabeçalhos ID3/MP4) e os últimos KB, ou copiar temporariamente para o cache, ler e apagar.
@@ -158,3 +158,7 @@ Anote aqui toda decisão tomada durante a implementação que mude ou detalhe es
 |---|---|---|---|
 | 2026-11-15 | — | Plano inicial aprovado | — |
 | 2026-11-15 | 0.1 | Alterações locais não commitadas do app RN foram commitadas na `main` (3ed97c2) antes de criar a branch | Manter a `main` como referência completa do comportamento antigo |
+| 2026-11-15 | 0.1 | Material importado de `package:material_ui` (não mais `package:flutter/material.dart`) | No Flutter 3.50 o Material saiu do SDK; o import antigo é obsoleto e o template já usa `material_ui` |
+| 2026-11-15 | 0 | Listagem de pastas e leitura de trechos de arquivo via **canal nativo próprio** (`SafChannel.kt`, canal `dev.alexandre.echoes/saf`: `listTree`, `readRange`); `docman` fica só para seletor e permissões persistidas | `docman.listDocuments` faz ~8 consultas ao ContentResolver por arquivo: 244 arquivos em 28 s. O canal faz 1 consulta por pasta: 0,4–0,9 s. O `readAsBytes` do docman usa `skip` e não para de ler ao cancelar |
+| 2026-11-15 | 0 | `metadata_audio` lido por um **tokenizer esparso** (cabeçalho + final via `readRange`, buscando trechos extras sob demanda) | O pacote não aceita `content://` e o `Tokenizer` dele é síncrono. 244 MP3: 0 falhas, todos com duração, 16 s. Ponto de otimização para a Fase 3: hoje lê 512 KB + 256 KB fixos por arquivo (178 MB no total) |
+| 2026-11-15 | 0 | Risco anotado: `docman` aplica o Kotlin Gradle Plugin no formato antigo | O Flutter avisa que versões futuras vão recusar o build. Como o uso agora é pequeno (seletor + permissões), dá para trocar por código no próprio `SafChannel` se for preciso |

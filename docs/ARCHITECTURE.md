@@ -29,8 +29,9 @@
 | `just_audio` | Motor de reprodução | Playlists de arquivos locais e URIs `content://`, posição inicial ao carregar fonte |
 | `audio_service` | Serviço em primeiro plano, notificação, tela de bloqueio, botões de fone | Padrão do ecossistema para áudio em segundo plano |
 | `audio_session` | Foco de áudio | Preset `speech`: pausa em ligações, pausa ao desconectar fone |
-| `docman` | Storage Access Framework | Escolher pasta, permissão persistente, listar recursivamente, ler arquivos |
-| `metadata_audio` | Tags, duração, capa embutida, capítulos de M4B | Port Dart do `music-metadata` (mesma base da versão antiga). **Fallback:** `flutter_taglib` |
+| `docman` | Storage Access Framework | Seletor de pasta/arquivos e permissões persistidas. **Listagem e leitura de trechos não usam o docman**: são feitas pelo canal nativo `SafChannel` (ver Android) |
+| `metadata_audio` | Tags, duração, capa embutida, capítulos de M4B | Port Dart do `music-metadata` (mesma base da versão antiga). Lê `content://` por meio de um `Tokenizer` esparso alimentado por `readRange`. **Fallback:** `flutter_taglib` |
+| `material_ui` | Widgets Material | No Flutter 3.50+ o Material saiu do SDK; importar `package:material_ui/material_ui.dart` |
 | `drift` + `drift_flutter` + `drift_dev` + `build_runner` | Banco SQLite | SQL tipado, migrações versionadas, consultas reativas |
 | `path_provider` | Diretório de suporte do app | Onde ficam capas extraídas |
 | `image_picker` | Escolher capa personalizada | Galeria do sistema, sem permissão de armazenamento |
@@ -40,7 +41,7 @@
 
 Fontes **Cormorant Garamond** (400, 500, 700) são empacotadas em `assets/fonts/` (sem download em runtime).
 
-> Decisão sob validação na Fase 0: `docman` e `metadata_audio` precisam funcionar com URIs `content://`. Se não funcionarem, ver alternativas em `docs/PLAN.md` → Fase 0.
+> Validado na Fase 0 (ver "Registro de decisões" em `docs/PLAN.md`): o `docman` sozinho listava devagar demais, por isso listagem e leitura de trechos usam o canal nativo próprio.
 
 ## Estrutura de pastas
 
@@ -61,10 +62,10 @@ lib/
       tables.dart                → tabelas
     storage/
       storage_gateway.dart       → interface: pickDirectory, pickAudioFiles, listTree, openRead, hasPermission, releasePermission
-      docman_storage_gateway.dart→ implementação SAF
+      saf_storage_gateway.dart   → implementação SAF (docman para seletor/permissões + canal nativo para listTree/readRange)
     metadata/
       metadata_reader.dart       → interface: read(uri) → AudioFileMetadata
-      metadata_audio_reader.dart → implementação
+      metadata_audio_reader.dart → implementação (com o tokenizer esparso sobre readRange)
     files/
       cover_store.dart           → salva/remove capas em <appSupport>/covers/
     utils/
@@ -152,7 +153,7 @@ Na inicialização e ao voltar ao primeiro plano, `ImportService.refreshAvailabi
 
 ## Android
 
-- `MainActivity` estende `AudioServiceActivity`.
+- `MainActivity` estende `AudioServiceActivity` e registra o `SafChannel` (`android/app/src/main/kotlin/dev/alexandre/echoes/SafChannel.kt`): canal `dev.alexandre.echoes/saf` com `listTree(uri)` (uma consulta `ContentResolver` por pasta, em thread própria) e `readRange(uri, start, length)` (leitura com seek via `FileChannel`).
 - `AndroidManifest.xml`: `FOREGROUND_SERVICE`, `FOREGROUND_SERVICE_MEDIA_PLAYBACK`, `WAKE_LOCK`, `POST_NOTIFICATIONS`; service e receiver do audio_service conforme documentação do pacote.
 - `applicationId`: `dev.alexandre.echoes`.
 - Nome exibido: `Echoes`. Ícone: reaproveitar `assets/images/icon.png` e os ícones adaptativos da versão antiga (`git show main:assets/images/...`).
