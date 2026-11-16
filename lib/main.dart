@@ -1,10 +1,8 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 
+import 'app/app.dart';
+
 void main() {
-  runApp(
-    const MaterialApp(
-      title: 'Echoes',
-      home: Scaffold(body: Center(child: Text('Echoes'))),
-    ),
-  );
+  runApp(const ProviderScope(child: EchoesApp()));
 }
