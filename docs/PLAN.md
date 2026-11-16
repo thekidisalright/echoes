@@ -113,7 +113,7 @@ Seguir `docs/FEATURES.md` e `docs/UI.md` à risca. Ordem:
 - [x] 5.1 Gerenciar biblioteca (botões, banner de progresso, lista de origens, atualizar, remover com confirmação, diálogo de modo).
 - [x] 5.2 Biblioteca: cabeçalho, banner, Continue ouvindo, busca, chips de ordenação, grade responsiva, estado vazio, origem indisponível.
 - [x] 5.3 MiniPlayer (com barra de progresso fina).
-- [ ] 5.4 Player: capa, textos, SeekBar, controles, linha de ações, gesto de arrastar para fechar.
+- [x] 5.4 Player: capa, textos, SeekBar, controles, linha de ações, gesto de arrastar para fechar.
 - [ ] 5.5 Capítulos e marcadores (com rolagem até o capítulo atual).
 - [ ] 5.6 Diálogo de edição de livro (capa via `image_picker` + `CoverStore`, restaurar dados originais).
 - [ ] 5.7 Configurações (ordenação + Sobre).

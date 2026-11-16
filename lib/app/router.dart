@@ -37,11 +37,13 @@ CustomTransitionPage<void> _slidePage(
   Widget child, {
   required Offset begin,
   bool fullscreenDialog = false,
+  bool opaque = true,
 }) {
   return CustomTransitionPage<void>(
     key: state.pageKey,
     child: child,
     fullscreenDialog: fullscreenDialog,
+    opaque: opaque,
     transitionDuration: _transitionDuration,
     reverseTransitionDuration: _transitionDuration,
     transitionsBuilder: (context, animation, secondaryAnimation, child) {
@@ -75,6 +77,8 @@ GoRouter buildRouter() {
           const PlayerScreen(),
           begin: _fromBottom,
           fullscreenDialog: true,
+          // A biblioteca aparece por baixo enquanto o Player é arrastado.
+          opaque: false,
         ),
       ),
       GoRoute(

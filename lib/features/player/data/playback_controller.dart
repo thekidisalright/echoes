@@ -67,6 +67,9 @@ class PlaybackController {
 
   String? get currentBookId => _book.value?.book.id;
 
+  /// Posição atual dentro do capítulo (para criar marcadores).
+  Duration get currentPosition => _handler.position;
+
   /// Abre o livro no capítulo e na posição salvos. Se já é o livro atual,
   /// só toca (com [autoplay]). Devolve falso se o livro não existe mais.
   Future<bool> openBook(String bookId, {bool autoplay = false}) async {
@@ -149,6 +152,17 @@ class PlaybackController {
   Future<void> playChapter(int index) async {
     await _handler.skipToQueueItem(index);
     await play();
+  }
+
+  /// Vai ao capítulo [chapterId] na [position] e toca (marcadores).
+  /// Devolve falso se o capítulo não está no livro carregado.
+  Future<bool> playAt(String chapterId, Duration position) async {
+    final chapters = _book.value?.chapters ?? const <Chapter>[];
+    final index = chapters.indexWhere((c) => c.id == chapterId);
+    if (index < 0) return false;
+    await _handler.seekInChapter(index, position);
+    await play();
+    return true;
   }
 
   /// Salva agora (app indo para segundo plano).

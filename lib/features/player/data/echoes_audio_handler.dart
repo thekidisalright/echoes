@@ -93,9 +93,13 @@ class EchoesAudioHandler extends BaseAudioHandler with SeekHandler {
   Future<void> seek(Duration position) => _player.seek(position);
 
   @override
-  Future<void> skipToQueueItem(int index) async {
+  Future<void> skipToQueueItem(int index) =>
+      seekInChapter(index, Duration.zero);
+
+  /// Vai para [position] dentro do capítulo [index] (marcadores).
+  Future<void> seekInChapter(int index, Duration position) async {
     if (index < 0 || index >= queue.value.length) return;
-    await _player.seek(Duration.zero, index: index);
+    await _player.seek(position, index: index);
   }
 
   @override

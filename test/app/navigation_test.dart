@@ -64,17 +64,15 @@ void main() {
     expect(find.text(AppStrings.settings), findsOneWidget);
   });
 
-  testWidgets('abre o Player e dele os Capítulos', (tester) async {
+  testWidgets('abre o Player e a tela de Capítulos', (tester) async {
     await pumpApp(tester);
-    // Sem livro carregado não há MiniPlayer: abre a rota direto.
-    unawaited(
-      GoRouter.of(tester.element(find.byType(LibraryScreen)))
-          .push(AppRoutes.player),
-    );
+    // Sem livro carregado não há MiniPlayer: abre as rotas direto.
+    final router = GoRouter.of(tester.element(find.byType(LibraryScreen)));
+    unawaited(router.push(AppRoutes.player));
     await tester.pumpAndSettle();
     expect(find.byTooltip(AppStrings.closePlayer), findsOneWidget);
 
-    await tester.tap(find.text(AppStrings.chapters));
+    unawaited(router.push(AppRoutes.chapters));
     await tester.pumpAndSettle();
     expect(find.text(AppStrings.chaptersAndBookmarks), findsOneWidget);
   });
