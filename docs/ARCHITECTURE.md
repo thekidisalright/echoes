@@ -55,6 +55,7 @@ lib/
     theme/
       colors.dart                → tokens de cor (ver docs/UI.md)
       typography.dart            → estilos de texto
+      spacing.dart               → espaçamentos e raios
       theme.dart                 → ThemeData
   core/
     database/

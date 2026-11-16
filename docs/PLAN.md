@@ -47,14 +47,14 @@ Objetivo: provar que as três peças de plataforma funcionam juntas **antes** de
 
 ## Fase 1 — Fundação
 
-- [ ] Adicionar pacotes definitivos (ver `docs/ARCHITECTURE.md` → Pacotes).
-- [ ] `analysis_options.yaml` com `flutter_lints` + regras extras: `prefer_const_constructors`, `prefer_final_locals`, `always_declare_return_types`, `avoid_print`, `require_trailing_commas`, `unawaited_futures`.
-- [ ] Estrutura de pastas completa conforme `docs/ARCHITECTURE.md` (pastas vazias com `.gitkeep` quando necessário).
+- [x] Adicionar pacotes definitivos (ver `docs/ARCHITECTURE.md` → Pacotes).
+- [x] `analysis_options.yaml` com `flutter_lints` + regras extras: `prefer_const_constructors`, `prefer_final_locals`, `always_declare_return_types`, `avoid_print`, `require_trailing_commas`, `unawaited_futures`.
+- [x] Estrutura de pastas completa conforme `docs/ARCHITECTURE.md` (pastas vazias com `.gitkeep` quando necessário).
 - [ ] Fontes Cormorant Garamond 400/500/700 em `assets/fonts/` e registradas no `pubspec.yaml`.
-- [ ] `app/theme/` com todos os tokens de `docs/UI.md`; `ThemeData` escuro.
-- [ ] `app/strings.dart` com todos os textos de `docs/FEATURES.md`.
-- [ ] `app/router.dart` com as rotas: `/` (biblioteca), `/player` (modal de baixo), `/chapters`, `/manage`, `/settings` — telas placeholder.
-- [ ] `core/utils/`: `natural_sort`, `file_names` (`cleanTitle`, `parseTrackNumber`, `isAudio`, `isImage`, `isPreferredCover`), `duration_format` — **com testes unitários** cobrindo os exemplos de `docs/FEATURES.md` 1.3.
+- [x] `app/theme/` com todos os tokens de `docs/UI.md`; `ThemeData` escuro.
+- [x] `app/strings.dart` com todos os textos de `docs/FEATURES.md`.
+- [x] `app/router.dart` com as rotas: `/` (biblioteca), `/player` (modal de baixo), `/chapters`, `/manage`, `/settings` — telas placeholder.
+- [x] `core/utils/`: `natural_sort`, `file_names` (`cleanTitle`, `parseTrackNumber`, `isAudio`, `isImage`, `isPreferredCover`), `duration_format` — **com testes unitários** cobrindo os exemplos de `docs/FEATURES.md` 1.3.
 - [ ] Ícone do app e splash a partir dos assets mantidos; nome "Echoes".
 
 **Aceite:** app abre no tema escuro com o título "Echoes" em Cormorant; navegação entre placeholders funciona; `flutter analyze` limpo; testes de utils passando.
@@ -162,3 +162,4 @@ Anote aqui toda decisão tomada durante a implementação que mude ou detalhe es
 | 2026-11-15 | 0 | Listagem de pastas e leitura de trechos de arquivo via **canal nativo próprio** (`SafChannel.kt`, canal `dev.alexandre.echoes/saf`: `listTree`, `readRange`); `docman` fica só para seletor e permissões persistidas | `docman.listDocuments` faz ~8 consultas ao ContentResolver por arquivo: 244 arquivos em 28 s. O canal faz 1 consulta por pasta: 0,4–0,9 s. O `readAsBytes` do docman usa `skip` e não para de ler ao cancelar |
 | 2026-11-15 | 0 | `metadata_audio` lido por um **tokenizer esparso** (`SparseTokenizer`, que estende `HttpBasedTokenizer`): 128 KB iniciais + 8 KB finais via `readRange`, `prefetchRange` atendido sob demanda e nova tentativa sempre que faltar um trecho. Código de referência no commit `c119164` (`lib/spike/saf_metadata.dart`) | O pacote não aceita `content://` e o `Tokenizer` dele é síncrono. Estender `HttpBasedTokenizer` faz o parser MP4 pedir o `moov` inteiro (8 MB no M4B testado); sem isso ele engolia a falta de bytes e devolvia tags vazias. Resultado: 245 arquivos, 0 falhas, 40 MB lidos, 12 s |
 | 2026-11-15 | 0 | Risco anotado: `docman` aplica o Kotlin Gradle Plugin no formato antigo | O Flutter avisa que versões futuras vão recusar o build. Como o uso agora é pequeno (seletor + permissões), dá para trocar por código no próprio `SafChannel` se for preciso |
+| 2026-11-16 | 1 | `cupertino_icons` removido; tokens de espaçamento e raios em `lib/app/theme/spacing.dart`; cores derivadas (`miniPlayerBorder`, `shadow`) viraram tokens | Só Android; nenhum valor visual solto em widget, conforme o CLAUDE.md |
