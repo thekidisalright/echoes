@@ -9,6 +9,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:material_ui/material_ui.dart';
 
+import '../../../support/accessibility.dart';
+
 void main() {
   testWidgets('marca a ordem salva e mostra a versão', (tester) async {
     await tester.pumpWidget(
@@ -44,5 +46,6 @@ void main() {
       ),
       findsOneWidget,
     );
+    await expectAccessible(tester);
   });
 }

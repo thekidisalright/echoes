@@ -7,6 +7,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 
+import '../../../support/accessibility.dart';
+
 void main() {
   final folder = LibrarySource(
     id: 'folder:1',
@@ -68,6 +70,7 @@ void main() {
     );
     expect(find.byTooltip(AppStrings.refreshSource), findsOneWidget);
     expect(find.byTooltip(AppStrings.removeSource), findsNWidgets(2));
+    await expectAccessible(tester);
   });
 
   testWidgets('remover pede confirmação e cancelar mantém a origem', (

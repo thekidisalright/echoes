@@ -12,6 +12,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 
+import '../../../support/accessibility.dart';
+
 void main() {
   final book = Book(
     id: 'b',
@@ -67,6 +69,7 @@ void main() {
     expect(find.text('01'), findsOneWidget);
     expect(find.text('Parte 1'), findsOneWidget);
     expect(find.text('03:05'), findsWidgets);
+    await expectAccessible(tester);
   });
 
   testWidgets('abre rolada até o capítulo atual, em dourado', (tester) async {
@@ -105,5 +108,6 @@ void main() {
     expect(find.text(AppStrings.chapterRemoved), findsOneWidget);
     expect(find.text('12:34 · 16/11/2026'), findsOneWidget);
     expect(find.byTooltip(AppStrings.removeBookmark), findsOneWidget);
+    await expectAccessible(tester);
   });
 }

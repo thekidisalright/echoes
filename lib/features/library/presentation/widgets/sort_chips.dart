@@ -50,20 +50,34 @@ class _Chip extends StatelessWidget {
       button: true,
       selected: selected,
       child: Material(
-        color: selected ? AppColors.accentFill : AppColors.surface,
-        borderRadius: BorderRadius.circular(AppRadii.chip),
+        type: MaterialType.transparency,
         child: InkWell(
           onTap: onTap,
-          borderRadius: BorderRadius.circular(AppRadii.chip),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.md,
-              vertical: AppSpacing.sm,
-            ),
-            child: Text(
-              label,
-              style: AppTypography.caption.copyWith(
-                color: selected ? AppColors.onAccent : AppColors.textSecondary,
+          customBorder: const StadiumBorder(),
+          // O chip é baixo; a área de toque tem a altura mínima.
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: AppSpacing.minTouch),
+            child: Center(
+              widthFactor: 1,
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: selected ? AppColors.accentFill : AppColors.surface,
+                  borderRadius: BorderRadius.circular(AppRadii.chip),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.md,
+                    vertical: AppSpacing.sm,
+                  ),
+                  child: Text(
+                    label,
+                    style: AppTypography.caption.copyWith(
+                      color: selected
+                          ? AppColors.onAccent
+                          : AppColors.textSecondary,
+                    ),
+                  ),
+                ),
               ),
             ),
           ),

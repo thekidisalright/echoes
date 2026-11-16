@@ -128,8 +128,8 @@ Seguir `docs/FEATURES.md` e `docs/UI.md` à risca. Ordem:
 
 - [x] `SleepTimerService`: por minutos (com tempo restante exposto) e fim de capítulo; folha inferior; cancelar.
 - [x] Marcadores no Player (feedback "Salvo") e na tela de capítulos (ir para, remover).
-- [ ] Animações de rota conforme `docs/UI.md` → Movimento.
-- [ ] Acessibilidade: `Semantics` com rótulos em todos os botões de ícone; ação de toque longo anunciada como "Editar audiobook"; áreas de toque ≥ 44.
+- [x] Animações de rota conforme `docs/UI.md` → Movimento.
+- [x] Acessibilidade: `Semantics` com rótulos em todos os botões de ícone; ação de toque longo anunciada como "Editar audiobook"; áreas de toque ≥ 44.
 - [ ] Revisão de desempenho: biblioteca com 200+ livros rolando sem travar (capas com `cacheWidth`); importação de pasta grande não congela a UI (leitura de metadados fora da thread de UI se necessário).
 - [ ] Build release assinado (`flutter build apk --release`) instalado e testado.
 
