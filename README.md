@@ -1,67 +1,131 @@
 # Echoes
 
-Player de audiobooks pessoal para Android, focado em arquivos locais (MP3, M4A, M4B).
-Esta branch (`flutter-rewrite`) é a **reconstrução completa do app em Flutter**, substituindo a versão React Native/Expo que vive na branch `main`.
+Um player de audiobooks para Android, feito para os livros que você já tem no celular.
 
-## Status
+Escolha a pasta onde estão os seus audiobooks (MP3, M4A ou M4B) e o Echoes organiza a biblioteca, mostra as capas e lembra onde você parou em cada livro. Sem conta, sem assinatura e sem internet.
 
-🚧 Em reconstrução. Acompanhe o progresso em [`docs/PLAN.md`](docs/PLAN.md).
+## O que ele faz
 
-## O que o Echoes faz
+- **Monta a biblioteca sozinho** a partir das suas pastas, com título, autor, capa e capítulos.
+- **Lembra onde você parou** em cada livro, até no meio de um capítulo.
+- **Toca em segundo plano**, com controles na notificação e na tela de bloqueio.
+- **Continue ouvindo:** os últimos livros que você ouviu ficam no topo da biblioteca.
+- **Marcadores** para guardar trechos e voltar a eles depois.
+- **Timer de sono** que pausa depois de 15, 30, 45 ou 60 minutos, ou no fim do capítulo.
+- **Busca e ordenação** por título ou pelos mais recentes.
+- **Edição** de título, autor e capa quando os dados do arquivo vierem errados.
 
-- Importa audiobooks a partir de **pastas** (cada pasta é um livro, ou a pasta inteira é um livro) ou de **arquivos soltos**.
-- Lê metadados (título, autor, faixa, duração) e capa — embutida no arquivo ou `cover.jpg` / `folder.jpg` da pasta.
-- Toca em segundo plano com controles na notificação e na tela de bloqueio.
-- Salva o progresso automaticamente e retoma de onde parou.
-- "Continue ouvindo", busca, ordenação, edição de título/autor/capa.
-- Marcadores, lista de capítulos e timer de sono.
+## Instalação
 
-## Stack
+Requer **Android 7.0 ou mais recente** (celular com processador de 64 bits, como quase todos os atuais).
 
-| Camada | Tecnologia |
-|---|---|
-| UI | Flutter (Material 3, tema escuro próprio) |
-| Estado | Riverpod |
-| Navegação | go_router |
-| Áudio | just_audio + audio_service + audio_session |
-| Arquivos | Storage Access Framework (docman) |
-| Metadados | metadata_audio (fallback: flutter_taglib) |
-| Banco | drift (SQLite) |
+1. Abra a página de [versões do Echoes](https://github.com/thekidisalright/echoes/releases/latest) no celular.
+2. Baixe o arquivo `.apk` da versão mais recente.
+3. Toque no arquivo baixado. Se o Android pedir, permita que o navegador ou o gerenciador de arquivos **instale apps desconhecidos**.
+4. Toque em **Instalar**.
 
-Detalhes e justificativas em [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
+O Echoes não está na Play Store. Por isso o Android pode mostrar um aviso do Play Protect na instalação. Os arquivos de cada versão ficam publicados aqui no GitHub.
 
-## Documentação
+## Primeiros passos
 
-| Documento | Conteúdo |
-|---|---|
-| [`CLAUDE.md`](CLAUDE.md) | Regras de trabalho para o Claude Code neste repositório |
-| [`docs/PLAN.md`](docs/PLAN.md) | Plano de execução em fases, com critérios de aceite |
-| [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | Arquitetura, camadas, pacotes e fluxos principais |
-| [`docs/DATA_MODEL.md`](docs/DATA_MODEL.md) | Schema do banco, IDs, regras de persistência |
-| [`docs/FEATURES.md`](docs/FEATURES.md) | Especificação funcional de cada tela e comportamento |
-| [`docs/UI.md`](docs/UI.md) | Identidade visual: cores, tipografia, componentes |
+### 1. Adicione seus audiobooks
 
-## Rodando o projeto
+Na tela inicial, toque no botão de **Gerenciar biblioteca** (o ícone de estante) e escolha uma das opções.
 
-Pré-requisitos: Flutter SDK estável, Android SDK, um dispositivo ou emulador Android.
+**Adicionar pasta.** Escolha a pasta onde estão os audiobooks. O Echoes pergunta como a pasta está organizada:
+
+- **Cada pasta é um livro:** para quando cada audiobook tem a sua própria subpasta.
+  ```
+  Audiobooks/
+  ├── Dom Casmurro/        → um livro
+  │   ├── 01.mp3
+  │   └── 02.mp3
+  └── O Cortiço/           → outro livro
+      └── ...
+  ```
+- **A pasta inteira é um livro:** para quando a pasta escolhida contém um único audiobook, com todos os arquivos dele.
+
+**Adicionar arquivos.** Escolha um ou mais arquivos de áudio. Eles viram um único livro.
+
+A leitura de uma pasta grande pode levar alguns segundos, e um aviso no topo da tela mostra o andamento.
+
+### 2. Ouça
+
+Toque num livro para abrir o player. O livro abre no ponto em que você parou, e você toca em ▶ para continuar.
+
+- **Voltar ou avançar 15 segundos** pelos botões ao lado do play.
+- **Capítulo anterior:** se você já passou dos 3 primeiros segundos, o botão volta ao início do capítulo atual.
+- **Fechar o player:** arraste a tela para baixo ou toque na seta no topo. O livro continua tocando, com um mini player no rodapé da biblioteca.
+
+Abaixo dos controles ficam três botões:
+
+- **Temporizador:** escolha quando pausar. O botão mostra o tempo restante ("Timer · 12 min"). Para desligar, toque nele de novo e escolha **Desligar temporizador**.
+- **Marcador:** guarda o ponto atual. Aparece "Salvo" por um instante.
+- **Capítulos:** lista os capítulos (toque para ir a um deles) e, na outra aba, os seus marcadores (toque para voltar ao trecho ou na lixeira para apagar).
+
+### 3. Organize
+
+- **Buscar:** digite parte do título ou do autor no campo de busca.
+- **Ordenar:** use **Recentes** ou **Título** acima da grade. A escolha fica salva.
+- **Editar um livro:** toque e segure a capa na biblioteca para mudar o título, o autor ou a imagem da capa.
+- **Atualizar uma pasta:** se você adicionou ou apagou arquivos, toque em atualizar ao lado da pasta em Gerenciar biblioteca. As suas edições e o seu progresso são mantidos.
+- **Remover uma pasta:** toque na lixeira ao lado dela em Gerenciar biblioteca. Isso tira os livros do Echoes, mas **não apaga os seus arquivos**.
+
+## Perguntas frequentes
+
+**Quais formatos são aceitos?**
+MP3, M4A e M4B.
+
+**De onde vêm o título, o autor e a capa?**
+Das informações gravadas nos próprios arquivos de áudio. Quando elas não existem, o título vem do nome da pasta ou do arquivo. A capa pode vir de uma imagem na pasta (como `cover.jpg` ou `folder.jpg`) ou da capa embutida no arquivo. Se algo vier errado, toque e segure o livro para corrigir.
+
+**O Echoes copia, move ou apaga os meus arquivos?**
+Não. Ele só lê as pastas que você escolhe, e os arquivos continuam onde estão.
+
+**Por que um livro aparece como "Pasta indisponível" ou "acesso indisponível"?**
+O Echoes perdeu o acesso à pasta, por exemplo porque ela foi renomeada, movida ou estava num cartão de memória removido. Volte a pasta para o lugar ou adicione-a de novo em Gerenciar biblioteca.
+
+**Em que ordem os capítulos tocam?**
+Pelo número da faixa: o gravado no arquivo ou, na falta dele, o número no início do nome (`01`, `02`…). Os demais arquivos vêm depois, em ordem alfabética.
+
+**O meu progresso fica salvo se eu desinstalar o app?**
+Não. A biblioteca, o progresso e os marcadores ficam guardados só dentro do app. Os arquivos de áudio não são afetados.
+
+## Privacidade
+
+O Echoes não pede permissão de internet, não tem conta e não coleta dados. Ele lê apenas as pastas e os arquivos que você escolhe, pelo seletor do próprio Android, sem acesso amplo ao armazenamento. A permissão de notificações serve só para mostrar os controles de reprodução.
+
+---
+
+## Para desenvolvedores
+
+App Android em **Flutter**, com Riverpod, go_router, drift (SQLite) e just_audio + audio_service. Os arquivos são acessados pelo Storage Access Framework.
 
 ```bash
 flutter pub get
-dart run build_runner build --delete-conflicting-outputs   # gera código do drift
+dart run build_runner build      # gera o código do drift
+flutter analyze
+flutter test
 flutter run
 ```
 
-Verificações:
+Para gerar o APK assinado, crie `android/key.properties` (fora do git) com `storeFile`, `storePassword`, `keyAlias` e `keyPassword`. Sem esse arquivo, o build release usa a chave de debug.
 
 ```bash
-flutter analyze
-flutter test
+flutter build apk --release --split-per-abi --target-platform android-arm64
 ```
 
-## Versão anterior
+| Documento | Conteúdo |
+|---|---|
+| [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | Arquitetura, camadas, pacotes e fluxos |
+| [`docs/FEATURES.md`](docs/FEATURES.md) | Comportamento de cada tela |
+| [`docs/UI.md`](docs/UI.md) | Cores, tipografia e componentes |
+| [`docs/DATA_MODEL.md`](docs/DATA_MODEL.md) | Esquema do banco |
+| [`docs/PLAN.md`](docs/PLAN.md) | Plano em fases e registro de decisões |
+| [`CLAUDE.md`](CLAUDE.md) | Regras de trabalho para o Claude Code |
 
-A versão React Native/Expo continua na branch `main` como referência de comportamento. Para consultar um arquivo antigo sem trocar de branch:
+A versão anterior, em React Native/Expo, está na tag `rn-legacy`:
 
 ```bash
-git show main:contexts/LibraryContext.tsx
+git show rn-legacy:contexts/LibraryContext.tsx
 ```
