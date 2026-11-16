@@ -63,15 +63,15 @@ Objetivo: provar que as três peças de plataforma funcionam juntas **antes** de
 
 ## Fase 2 — Banco de dados
 
-- [ ] Tabelas drift conforme `docs/DATA_MODEL.md`, `schemaVersion = 1`, `foreign_keys = ON`.
-- [ ] `LibraryRepository`: `saveScannedSource`, `removeSource`, `updateBookDetails`, `resetBookDetails`, `watchLibrary`, `watchContinueListening`, `watchSources`, `chaptersOf`, `getBook`.
-- [ ] `ProgressRepository` (pode ficar dentro do player): `saveProgress`, `getProgress`, `touchLastPlayed`.
-- [ ] `BookmarkRepository`: `add`, `remove`, `watchByBook`.
-- [ ] `SettingsRepository`: `lastPlayedBookId`, `librarySort`.
-- [ ] `CoverStore` (`core/files/`).
-- [ ] Testes com banco em memória: reimportação preserva `custom*` e progresso; livros/capítulos ausentes no novo scan são removidos; progresso apontando para capítulo removido é reposicionado; remoção de origem faz cascade.
+- [x] Tabelas drift conforme `docs/DATA_MODEL.md`, `schemaVersion = 1`, `foreign_keys = ON`.
+- [x] `LibraryRepository`: `saveScannedSource`, `removeSource`, `updateBookDetails`, `resetBookDetails`, `watchLibrary`, `watchContinueListening`, `watchSources`, `chaptersOf`, `getBook`.
+- [x] `ProgressRepository` (pode ficar dentro do player): `saveProgress`, `getProgress`, `touchLastPlayed`.
+- [x] `BookmarkRepository`: `add`, `remove`, `watchByBook`.
+- [x] `SettingsRepository`: `lastPlayedBookId`, `librarySort`.
+- [x] `CoverStore` (`core/files/`).
+- [x] Testes com banco em memória: reimportação preserva `custom*` e progresso; livros/capítulos ausentes no novo scan são removidos; progresso apontando para capítulo removido é reposicionado; remoção de origem faz cascade.
 
-**Aceite:** todos os testes de repositório passam.
+**Aceite:** ✅ concluído em 2026-11-16. 32 testes novos de repositório e `CoverStore` passando (61 no total); `flutter analyze` limpo.
 
 ---
 
@@ -166,3 +166,8 @@ Anote aqui toda decisão tomada durante a implementação que mude ou detalhe es
 | 2026-11-16 | 1 | Cormorant Garamond empacotada como **fonte variável** (`CormorantGaramond-VariableFont_wght.ttf`), com o peso aplicado via `FontVariation.weight` | Arquivo fornecido pelo usuário; um único `.ttf` cobre 400/500/700 |
 | 2026-11-16 | 1 | Splash e janela com fundo `#171614` (sem imagem); ícone e splash gerados à mão, sem `flutter_launcher_icons`/`flutter_native_splash` | Decisão do usuário. Os PNGs de `assets/images/` são os placeholders do template do Expo, por isso não foram usados |
 | 2026-11-16 | 1 | Ícone próprio desenhado em vetor (`drawable/ic_launcher_foreground.xml` e `ic_launcher_monochrome.xml`: ponto e três anéis de eco em `accent` sobre `background`), adaptativo com variante monocromática; PNGs legados (API 24–25) gerados com o mesmo desenho | Os PNGs de `assets/images/` eram placeholders do Expo; o usuário pediu um ícone vetorial |
+| 2026-11-16 | 2 | Busca da biblioteca feita em Dart (`toLowerCase` + `contains` sobre título e autor exibidos), não com `LIKE` | O `LIKE`/`lower()` do SQLite só ignoram maiúsculas em ASCII ("É" ≠ "é"); a ordenação por título já é em Dart, e o app antigo filtrava assim |
+| 2026-11-16 | 2 | Na reimportação, marcadores que apontam para um capítulo removido são apagados | O DATA_MODEL não define o caso; um marcador de capítulo inexistente não tem para onde levar |
+| 2026-11-16 | 2 | Capas órfãs são limpas por `CoverStore.deleteOrphans(LibraryRepository.coverPathsInUse())`, chamado pelo `ImportService` (Fase 3) depois de salvar ou remover origem | Um único caminho cobre remoção de origem, livros sumidos no reescaneamento e troca de extensão da capa |
+| 2026-11-16 | 2 | `LibraryRepository` ganhou `getSource`, `setSourceAvailability` e `chapterUrisOutside` (para o `skipUris`); `ProgressRepository` fica em `features/player/data/` e ignora livro inexistente em vez de falhar | Necessários para `rescan`, `refreshAvailability` e a regra de duplicatas da Fase 3; o player pode salvar progresso logo após a origem ser removida |
+| 2026-11-16 | 2 | `app_database.g.dart` é versionado | Build e testes funcionam sem rodar o `build_runner`; ele continua sendo regenerado após mudar tabelas |
