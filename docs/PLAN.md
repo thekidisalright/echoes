@@ -55,9 +55,9 @@ Objetivo: provar que as três peças de plataforma funcionam juntas **antes** de
 - [x] `app/strings.dart` com todos os textos de `docs/FEATURES.md`.
 - [x] `app/router.dart` com as rotas: `/` (biblioteca), `/player` (modal de baixo), `/chapters`, `/manage`, `/settings` — telas placeholder.
 - [x] `core/utils/`: `natural_sort`, `file_names` (`cleanTitle`, `parseTrackNumber`, `isAudio`, `isImage`, `isPreferredCover`), `duration_format` — **com testes unitários** cobrindo os exemplos de `docs/FEATURES.md` 1.3.
-- [ ] Ícone do app e splash a partir dos assets mantidos; nome "Echoes".
+- [x] Ícone do app e splash a partir dos assets mantidos; nome "Echoes".
 
-**Aceite:** app abre no tema escuro com o título "Echoes" em Cormorant; navegação entre placeholders funciona; `flutter analyze` limpo; testes de utils passando.
+**Aceite:** ✅ concluído em 2026-11-16 (Android 15; ícone na home a conferir pelo usuário). App abre no tema escuro com o título "Echoes" em Cormorant; navegação entre placeholders funciona; `flutter analyze` limpo; testes de utils passando.
 
 ---
 
@@ -165,3 +165,4 @@ Anote aqui toda decisão tomada durante a implementação que mude ou detalhe es
 | 2026-11-16 | 1 | `cupertino_icons` removido; tokens de espaçamento e raios em `lib/app/theme/spacing.dart`; cores derivadas (`miniPlayerBorder`, `shadow`) viraram tokens | Só Android; nenhum valor visual solto em widget, conforme o CLAUDE.md |
 | 2026-11-16 | 1 | Cormorant Garamond empacotada como **fonte variável** (`CormorantGaramond-VariableFont_wght.ttf`), com o peso aplicado via `FontVariation.weight` | Arquivo fornecido pelo usuário; um único `.ttf` cobre 400/500/700 |
 | 2026-11-16 | 1 | Splash e janela com fundo `#171614` (sem imagem); ícone e splash gerados à mão, sem `flutter_launcher_icons`/`flutter_native_splash` | Decisão do usuário. Os PNGs de `assets/images/` são os placeholders do template do Expo, por isso não foram usados |
+| 2026-11-16 | 1 | Ícone próprio desenhado em vetor (`drawable/ic_launcher_foreground.xml` e `ic_launcher_monochrome.xml`: ponto e três anéis de eco em `accent` sobre `background`), adaptativo com variante monocromática; PNGs legados (API 24–25) gerados com o mesmo desenho | Os PNGs de `assets/images/` eram placeholders do Expo; o usuário pediu um ícone vetorial |

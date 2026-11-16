@@ -157,4 +157,4 @@ Na inicialização e ao voltar ao primeiro plano, `ImportService.refreshAvailabi
 - `MainActivity` estende `AudioServiceActivity` e registra o `SafChannel` (`android/app/src/main/kotlin/dev/alexandre/echoes/SafChannel.kt`): canal `dev.alexandre.echoes/saf` com `listTree(uri)` (uma consulta `ContentResolver` por pasta, em thread própria) e `readRange(uri, start, length)` (leitura com seek via `FileChannel`).
 - `AndroidManifest.xml`: `FOREGROUND_SERVICE`, `FOREGROUND_SERVICE_MEDIA_PLAYBACK`, `WAKE_LOCK`, `POST_NOTIFICATIONS`; service e receiver do audio_service conforme documentação do pacote.
 - `applicationId`: `dev.alexandre.echoes`.
-- Nome exibido: `Echoes`. Ícone: reaproveitar `assets/images/icon.png` e os ícones adaptativos da versão antiga (`git show main:assets/images/...`).
+- Nome exibido: `Echoes`. Ícone: vetor adaptativo próprio em `res/drawable/ic_launcher_*.xml` + `res/mipmap-anydpi-v26/ic_launcher.xml` (com monocromático); PNGs legados em `res/mipmap-*/` para API 24–25. Os PNGs de `assets/images/` são placeholders do Expo e não são usados.

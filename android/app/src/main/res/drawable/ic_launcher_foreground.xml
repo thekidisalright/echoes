@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Ícone do Echoes: ponto central e anéis de eco. Viewport 108 = ícone adaptativo. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:fillColor="#D1AA65"
+        android:pathData="M54,48a6,6 0,1 1,0 12a6,6 0,1 1,0 -12z" />
+    <path
+        android:strokeColor="#D1AA65"
+        android:strokeAlpha="0.85"
+        android:strokeWidth="3.2"
+        android:pathData="M54,40a14,14 0,1 1,0 28a14,14 0,1 1,0 -28z" />
+    <path
+        android:strokeColor="#D1AA65"
+        android:strokeAlpha="0.55"
+        android:strokeWidth="2.8"
+        android:pathData="M54,32a22,22 0,1 1,0 44a22,22 0,1 1,0 -44z" />
+    <path
+        android:strokeColor="#D1AA65"
+        android:strokeAlpha="0.3"
+        android:strokeWidth="2.4"
+        android:pathData="M54,24a30,30 0,1 1,0 60a30,30 0,1 1,0 -60z" />
+</vector>
