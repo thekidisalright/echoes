@@ -21,12 +21,12 @@ Marque `[x]` ao concluir cada tarefa e faça commit ao final de cada grupo coeso
 Objetivo: provar que as três peças de plataforma funcionam juntas **antes** de construir qualquer coisa em cima.
 
 ### 0.1 Branch e limpeza
-- [ ] `git switch -c flutter-rewrite` a partir de `main` (os .md desta documentação vêm junto).
-- [ ] Remover todos os arquivos do projeto Expo: `app/`, `components/`, `contexts/`, `src/`, `types/`, `android/`, `.expo/`, `node_modules/`, `package.json`, `package-lock.json`, `app.json`, `babel.config.js`, `metro.config.js`, `tailwind.config.js`, `global.css`, `*.d.ts`, `eslint.config.js`, `tsconfig.json`, `.vscode/settings.json` (se for específico de RN).
-- [ ] **Manter:** `README.md`, `CLAUDE.md`, `docs/`, `.git/`, `assets/images/icon.png`, `assets/images/android-icon-*.png`, `assets/images/splash-icon.png`.
-- [ ] `flutter create --org dev.alexandre --project-name echoes --platforms android .`
-- [ ] Ajustar `.gitignore` para Flutter.
-- [ ] Commit: `chore: substituir projeto Expo por projeto Flutter`.
+- [x] `git switch -c flutter-rewrite` a partir de `main` (os .md desta documentação vêm junto).
+- [x] Remover todos os arquivos do projeto Expo: `app/`, `components/`, `contexts/`, `src/`, `types/`, `android/`, `.expo/`, `node_modules/`, `package.json`, `package-lock.json`, `app.json`, `babel.config.js`, `metro.config.js`, `tailwind.config.js`, `global.css`, `*.d.ts`, `eslint.config.js`, `tsconfig.json`, `.vscode/settings.json` (se for específico de RN).
+- [x] **Manter:** `README.md`, `CLAUDE.md`, `docs/`, `.git/`, `assets/images/icon.png`, `assets/images/android-icon-*.png`, `assets/images/splash-icon.png`.
+- [x] `flutter create --org dev.alexandre --project-name echoes --platforms android .`
+- [x] Ajustar `.gitignore` para Flutter.
+- [x] Commit: `chore: substituir projeto Expo por projeto Flutter`.
 
 ### 0.2 Spike (código descartável em `lib/spike/`, removido no fim da fase)
 - [ ] Adicionar `docman`, `metadata_audio`, `just_audio`.
@@ -157,3 +157,4 @@ Anote aqui toda decisão tomada durante a implementação que mude ou detalhe es
 | Data | Fase | Decisão | Motivo |
 |---|---|---|---|
 | 2026-11-15 | — | Plano inicial aprovado | — |
+| 2026-11-15 | 0.1 | Alterações locais não commitadas do app RN foram commitadas na `main` (3ed97c2) antes de criar a branch | Manter a `main` como referência completa do comportamento antigo |
