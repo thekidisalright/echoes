@@ -11,6 +11,9 @@ import 'book_cover.dart';
 
 /// Item da grade: capa 3:4, título, autor e detalhe.
 class BookGridItem extends StatefulWidget {
+  /// Densidade máxima da capa na grade (2× basta para miniaturas).
+  static const coverPixelRatio = 2.0;
+
   const BookGridItem({
     required this.summary,
     required this.onTap,
@@ -78,6 +81,7 @@ class _BookGridItemState extends State<BookGridItem> {
                   path: book.coverPath,
                   placeholderIcon: Ionicons.bookOutline,
                   radius: AppRadii.cover,
+                  maxPixelRatio: BookGridItem.coverPixelRatio,
                 ),
               ),
               const SizedBox(height: AppSpacing.sm),

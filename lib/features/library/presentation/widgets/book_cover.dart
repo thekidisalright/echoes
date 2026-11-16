@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math' as math;
 
 import 'package:material_ui/material_ui.dart';
 
@@ -17,6 +18,7 @@ class BookCover extends StatelessWidget {
     this.iconSize = 48,
     this.background = AppColors.surfaceAlt,
     this.iconColor = AppColors.textMuted,
+    this.maxPixelRatio,
     super.key,
   });
 
@@ -26,6 +28,10 @@ class BookCover extends StatelessWidget {
   final double radius;
   final Color background;
   final Color iconColor;
+
+  /// Teto da densidade usada para decodificar. Nas listas, capas menores
+  /// cabem todas no cache de imagens e não são decodificadas de novo ao rolar.
+  final double? maxPixelRatio;
 
   @override
   Widget build(BuildContext context) {
@@ -41,7 +47,9 @@ class BookCover extends StatelessWidget {
             ? placeholder
             : LayoutBuilder(
                 builder: (context, constraints) {
-                  final ratio = MediaQuery.devicePixelRatioOf(context);
+                  final device = MediaQuery.devicePixelRatioOf(context);
+                  final cap = maxPixelRatio;
+                  final ratio = cap == null ? device : math.min(device, cap);
                   final width = constraints.maxWidth.isFinite
                       ? (constraints.maxWidth * ratio).round()
                       : null;

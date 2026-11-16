@@ -130,7 +130,7 @@ Seguir `docs/FEATURES.md` e `docs/UI.md` à risca. Ordem:
 - [x] Marcadores no Player (feedback "Salvo") e na tela de capítulos (ir para, remover).
 - [x] Animações de rota conforme `docs/UI.md` → Movimento.
 - [x] Acessibilidade: `Semantics` com rótulos em todos os botões de ícone; ação de toque longo anunciada como "Editar audiobook"; áreas de toque ≥ 44.
-- [ ] Revisão de desempenho: biblioteca com 200+ livros rolando sem travar (capas com `cacheWidth`); importação de pasta grande não congela a UI (leitura de metadados fora da thread de UI se necessário).
+- [x] Revisão de desempenho: biblioteca com 200+ livros rolando sem travar (capas com `cacheWidth`); importação de pasta grande não congela a UI (leitura de metadados fora da thread de UI se necessário).
 - [x] Build release assinado (`flutter build apk --release`) instalado e testado.
 
 **Aceite (checklist manual final):**
@@ -208,3 +208,5 @@ Anote aqui toda decisão tomada durante a implementação que mude ou detalhe es
 | 2026-11-16 | 6 | Release assinado por `android/key.properties` (fora do git; sem ele, cai na chave de debug com aviso); debug ganha `applicationIdSuffix = ".debug"` | Debug e release convivem no aparelho; trocar de um para o outro não exige desinstalar e perder a biblioteca |
 | 2026-11-16 | 6 | Importação continua na thread principal, sem isolate | Release medido: 245 arquivos (3 livros) em 13,6 s, sem nenhum "Skipped frames" do processo do app; o tempo é E/S do SAF |
 | 2026-11-16 | 6 | Splash do Android 12+ com o ícone (`windowSplashScreenAnimatedIcon` = `ic_launcher_foreground`) sobre `#171614`, também em `values-night-v31` — substitui a decisão da Fase 1 de janela sem imagem | Escolha do usuário após medir o release (abertura a frio 1,2–2,3 s); o qualificador `night` vencia o `v31` e escondia os itens de splash |
+| 2026-11-16 | 6 | Capas da grade decodificadas a no máximo 2× (`BookGridItem.coverPixelRatio`); Player e demais telas seguem a densidade do aparelho | Build profile com 250 livros, em pé: quadros > 16 ms caíram de 5,7% (127/2 233) para 2,0% (41/2 064); a 2,75× as capas estouravam o cache de 100 MB e eram decodificadas de novo ao rolar |
+| 2026-11-16 | 6 | Build profile vira `dev.alexandre.echoes.profile` via `androidComponents.onVariants` | Medir com AOT sem apagar o release; `applicationIdSuffix` no buildType `profile` vaza para os módulos dos plugins e quebra o build |
