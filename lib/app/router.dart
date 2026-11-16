@@ -16,6 +16,17 @@ abstract final class AppRoutes {
   static const settings = '/settings';
 }
 
+/// Navigator raiz: usado para alertas que não pertencem a uma tela (falha de
+/// importação que termina depois de o usuário sair de Gerenciar).
+final rootNavigatorKey = GlobalKey<NavigatorState>();
+
+/// Argumento opcional de [AppRoutes.manage]: aviso exibido no topo.
+class ManageLibraryArgs {
+  const ManageLibraryArgs({this.notice});
+
+  final String? notice;
+}
+
 const _transitionDuration = Duration(milliseconds: 300);
 const _fromRight = Offset(1, 0);
 const _fromBottom = Offset(0, 1);
@@ -49,6 +60,7 @@ CustomTransitionPage<void> _slidePage(
 
 GoRouter buildRouter() {
   return GoRouter(
+    navigatorKey: rootNavigatorKey,
     initialLocation: AppRoutes.library,
     routes: [
       GoRoute(
@@ -73,7 +85,13 @@ GoRouter buildRouter() {
       GoRoute(
         path: AppRoutes.manage,
         pageBuilder: (context, state) =>
-            _slidePage(state, const ManageLibraryScreen(), begin: _fromRight),
+            _slidePage(
+              state,
+              ManageLibraryScreen(
+                notice: (state.extra as ManageLibraryArgs?)?.notice,
+              ),
+              begin: _fromRight,
+            ),
       ),
       GoRoute(
         path: AppRoutes.settings,

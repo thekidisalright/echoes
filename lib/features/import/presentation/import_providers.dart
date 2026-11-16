@@ -6,6 +6,7 @@ import '../../../core/providers.dart';
 import '../../../core/storage/storage_gateway.dart';
 import '../../library/domain/library_source.dart';
 import '../../library/presentation/library_providers.dart';
+import '../../player/presentation/player_providers.dart';
 import '../data/import_service.dart';
 import '../data/library_scanner.dart';
 import '../domain/import_mode.dart';
@@ -104,7 +105,15 @@ class ImportController extends Notifier<ImportState> {
     () => _service.rescan(source, onProgress: _progress),
   );
 
-  Future<void> remove(LibrarySource source) => _service.remove(source);
+  /// Remove a origem. Se o livro carregado no player é dela, salva o
+  /// progresso e descarrega o player antes (o MiniPlayer some).
+  Future<void> remove(LibrarySource source) async {
+    final playback = ref.read(playbackControllerProvider);
+    if (playback.currentState.book?.sourceId == source.id) {
+      await playback.close();
+    }
+    await _service.remove(source);
+  }
 
   Future<void> refreshAvailability() => _service.refreshAvailability();
 

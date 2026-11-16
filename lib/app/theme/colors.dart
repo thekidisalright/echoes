@@ -21,6 +21,9 @@ abstract final class AppColors {
   static const iconOnDark = Color(0xFFFAFAFA);
   static const track = Color(0xFF3A3935);
 
+  /// Fundo de botão destrutivo ("Remover").
+  static const danger = Color(0xFF8C3F35);
+
   /// `#0A0A0A` a 85%.
   static const miniPlayerBg = Color(0xD90A0A0A);
 

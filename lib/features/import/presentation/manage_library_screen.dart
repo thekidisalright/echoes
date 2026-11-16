@@ -1,123 +1,105 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../../../app/strings.dart';
+import '../../../app/theme/colors.dart';
 import '../../../app/theme/spacing.dart';
 import '../../../app/theme/typography.dart';
+import '../../../app/widgets/dialogs.dart';
+import '../../../app/widgets/screen_header.dart';
 import '../../library/domain/library_source.dart';
 import '../../library/presentation/library_providers.dart';
-import '../domain/import_mode.dart';
-import '../domain/import_progress.dart';
 import '../domain/import_result.dart';
 import 'import_providers.dart';
+import 'widgets/import_mode_dialog.dart';
+import 'widgets/import_status_banner.dart';
+import 'widgets/source_tile.dart';
 
-/// Gerenciar biblioteca.
-///
-/// PROVISÓRIO (Fase 3): versão mínima para validar a importação no aparelho.
-/// O layout definitivo (banner, cartões de origem, confirmação de remoção)
-/// vem na Fase 5.1.
+/// Gerenciar biblioteca: adicionar pastas e arquivos, atualizar e remover
+/// origens. As falhas viram alerta no `EchoesApp`.
 class ManageLibraryScreen extends ConsumerWidget {
-  const ManageLibraryScreen({super.key});
+  const ManageLibraryScreen({this.notice, super.key});
+
+  /// Aviso no topo (ex.: o livro tocado está numa pasta indisponível).
+  final String? notice;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final state = ref.watch(importControllerProvider);
+    final busy = ref.watch(importControllerProvider) is ImportRunning;
     final sources = ref.watch(sourcesProvider).value ?? const [];
-    final busy = state is ImportRunning;
-
-    ref.listen(importControllerProvider, (_, next) {
-      if (next is ImportFailed) {
-        ref.read(importControllerProvider.notifier).clearError();
-        final (title, message) = switch (next.kind) {
-          ImportErrorKind.folder => (
-            AppStrings.importFolderErrorTitle,
-            AppStrings.importFolderErrorMessage,
-          ),
-          ImportErrorKind.files => (
-            AppStrings.importFilesErrorTitle,
-            AppStrings.importFilesErrorMessage,
-          ),
-          ImportErrorKind.accessExpired => (
-            AppStrings.accessExpiredTitle,
-            AppStrings.accessExpiredMessage,
-          ),
-        };
-        _alert(context, title, message);
-      }
-    });
+    final notice = this.notice;
+    final padding = AppSpacing.screenPaddingFor(
+      MediaQuery.sizeOf(context).width,
+    );
 
     return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          tooltip: AppStrings.back,
-          icon: const Icon(Ionicons.arrowBack),
-          onPressed: () => context.pop(),
-        ),
-        title: const Text(
-          AppStrings.manageLibrary,
-          style: AppTypography.sectionTitle,
-        ),
-      ),
-      body: ListView(
-        padding: const EdgeInsets.all(AppSpacing.screenPadding),
-        children: [
-          FilledButton.icon(
-            onPressed: busy ? null : () => _addFolder(context, ref),
-            icon: const Icon(Ionicons.folderOpenOutline),
-            label: const Text(AppStrings.addFolder),
+      body: SafeArea(
+        child: ListView(
+          padding: EdgeInsets.fromLTRB(
+            padding,
+            AppSpacing.screenTop,
+            padding,
+            AppSpacing.listBottom,
           ),
-          OutlinedButton.icon(
-            onPressed: busy ? null : () => _addFiles(context, ref),
-            icon: const Icon(Ionicons.documentsOutline),
-            label: const Text(AppStrings.addFiles),
-          ),
-          if (state is ImportRunning)
-            ListTile(
-              leading: const CircularProgressIndicator(),
-              title: Text(_progressText(state.progress)),
+          children: [
+            const ScreenHeader(title: AppStrings.manageLibrary),
+            const SizedBox(height: AppSpacing.xl),
+            if (notice != null) ...[
+              InfoBanner(
+                leading: const Icon(
+                  Ionicons.informationCircleOutline,
+                  size: AppSpacing.actionIcon,
+                  color: AppColors.accent,
+                ),
+                text: notice,
+              ),
+              const SizedBox(height: AppSpacing.lg),
+            ],
+            Row(
+              spacing: AppSpacing.md,
+              children: [
+                Expanded(
+                  child: _ImportButton(
+                    icon: Ionicons.folderOpenOutline,
+                    label: AppStrings.addFolder,
+                    onPressed: busy ? null : () => _addFolder(context, ref),
+                  ),
+                ),
+                Expanded(
+                  child: _ImportButton(
+                    icon: Ionicons.musicalNotesOutline,
+                    label: AppStrings.addFiles,
+                    onPressed: busy ? null : () => _addFiles(context, ref),
+                  ),
+                ),
+              ],
             ),
-          const SizedBox(height: AppSpacing.screenPadding),
-          const Text(
-            AppStrings.sourcesSection,
-            style: AppTypography.subsectionTitle,
-          ),
-          if (sources.isEmpty)
-            const Text(AppStrings.sourcesEmpty, style: AppTypography.bodySmall),
-          for (final source in sources)
-            ListTile(
-              title: Text(source.name),
-              subtitle: Text(
-                AppStrings.sourceSummary(
-                  source.bookCount,
-                  available: source.available,
+            const SizedBox(height: AppSpacing.lg),
+            const ImportStatusBanner(),
+            const Text(
+              AppStrings.sourcesSection,
+              style: AppTypography.sectionTitle,
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            if (sources.isEmpty)
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: AppSpacing.lg),
+                child: Text(
+                  AppStrings.sourcesEmpty,
+                  style: AppTypography.bodySmall,
                 ),
               ),
-              trailing: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  if (source.kind == SourceKind.folder)
-                    IconButton(
-                      tooltip: AppStrings.refreshSource,
-                      icon: const Icon(Ionicons.refresh),
-                      onPressed: busy
-                          ? null
-                          : () => _rescan(context, ref, source),
-                    ),
-                  IconButton(
-                    tooltip: AppStrings.removeSource,
-                    icon: const Icon(Ionicons.trashOutline),
-                    onPressed: busy
-                        ? null
-                        : () => ref
-                              .read(importControllerProvider.notifier)
-                              .remove(source),
-                  ),
-                ],
+            for (final source in sources)
+              SourceTile(
+                key: ValueKey(source.id),
+                source: source,
+                enabled: !busy,
+                onRefresh: () => _rescan(context, ref, source),
+                onRemove: () => _remove(context, ref, source),
               ),
-            ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -126,37 +108,14 @@ class ManageLibraryScreen extends ConsumerWidget {
     final controller = ref.read(importControllerProvider.notifier);
     final dir = await controller.pickDirectory();
     if (dir == null || !context.mounted) return;
-    final mode = await showDialog<ImportMode>(
-      context: context,
-      builder: (context) => SimpleDialog(
-        title: const Text(AppStrings.importModeTitle),
-        children: [
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: AppSpacing.dialogPadding),
-            child: Text(AppStrings.importModeMessage),
-          ),
-          SimpleDialogOption(
-            onPressed: () => Navigator.pop(context, ImportMode.oneBook),
-            child: const Text(AppStrings.importModeOneBook),
-          ),
-          SimpleDialogOption(
-            onPressed: () => Navigator.pop(context, ImportMode.booksInFolders),
-            child: const Text(AppStrings.importModeBooksInFolders),
-          ),
-          SimpleDialogOption(
-            onPressed: () => Navigator.pop(context),
-            child: const Text(AppStrings.cancel),
-          ),
-        ],
-      ),
-    );
+    final mode = await showImportModeDialog(context);
     if (mode == null) return;
     final result = await controller.importFolder(dir, mode);
     if (result is ImportNothingNew && context.mounted) {
-      await _alert(
+      await showMessageDialog(
         context,
-        AppStrings.importNothingNewTitle,
-        AppStrings.importNothingNewMessage,
+        title: AppStrings.importNothingNewTitle,
+        message: AppStrings.importNothingNewMessage,
       );
     }
   }
@@ -177,7 +136,9 @@ class ManageLibraryScreen extends ConsumerWidget {
       ),
       _ => null,
     };
-    if (alert != null) await _alert(context, alert.$1, alert.$2);
+    if (alert != null) {
+      await showMessageDialog(context, title: alert.$1, message: alert.$2);
+    }
   }
 
   Future<void> _rescan(
@@ -186,29 +147,58 @@ class ManageLibraryScreen extends ConsumerWidget {
     LibrarySource source,
   ) => ref.read(importControllerProvider.notifier).rescan(source);
 
-  static String _progressText(ImportProgress progress) => switch (progress) {
-    ImportPreparing() => AppStrings.importPreparing,
-    ImportReadingFolder(:final current, :final total) =>
-      AppStrings.importReadingFolder(current, total),
-    ImportReadingFiles(:final count) => AppStrings.importReadingFiles(count),
-    ImportSaving() => AppStrings.importSaving,
-  };
-
-  static Future<void> _alert(
+  Future<void> _remove(
     BuildContext context,
-    String title,
-    String message,
-  ) => showDialog<void>(
-    context: context,
-    builder: (context) => AlertDialog(
-      title: Text(title),
-      content: Text(message),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: const Text(AppStrings.ok),
+    WidgetRef ref,
+    LibrarySource source,
+  ) async {
+    final confirmed = await showConfirmDialog(
+      context,
+      title: AppStrings.removeSourceTitle,
+      message: AppStrings.removeSourceMessage(source.name),
+      confirmLabel: AppStrings.remove,
+      destructive: true,
+    );
+    if (!confirmed) return;
+    await ref.read(importControllerProvider.notifier).remove(source);
+  }
+}
+
+/// "Adicionar pasta" / "Adicionar arquivos".
+class _ImportButton extends StatelessWidget {
+  const _ImportButton({
+    required this.icon,
+    required this.label,
+    required this.onPressed,
+  });
+
+  final IconData icon;
+  final String label;
+  final VoidCallback? onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return OutlinedButton.icon(
+      onPressed: onPressed,
+      icon: Icon(icon, size: AppSpacing.actionIcon),
+      label: Text(
+        label,
+        style: AppTypography.bodySmall.copyWith(color: AppColors.textPrimary),
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+      ),
+      style: OutlinedButton.styleFrom(
+        backgroundColor: AppColors.surface,
+        foregroundColor: AppColors.accent,
+        side: const BorderSide(color: AppColors.borderAccent),
+        padding: const EdgeInsets.symmetric(
+          vertical: AppSpacing.lg,
+          horizontal: AppSpacing.sm,
         ),
-      ],
-    ),
-  );
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppRadii.field),
+        ),
+      ),
+    );
+  }
 }

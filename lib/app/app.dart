@@ -8,6 +8,7 @@ import '../features/player/presentation/player_providers.dart';
 import 'router.dart';
 import 'strings.dart';
 import 'theme/theme.dart';
+import 'widgets/dialogs.dart';
 
 class EchoesApp extends ConsumerStatefulWidget {
   const EchoesApp({super.key});
@@ -42,8 +43,32 @@ class _EchoesAppState extends ConsumerState<EchoesApp> {
     super.dispose();
   }
 
+  /// Falhas de importação viram alerta, onde quer que o usuário esteja.
+  void _onImportState(ImportState? _, ImportState next) {
+    if (next is! ImportFailed) return;
+    ref.read(importControllerProvider.notifier).clearError();
+    final context = rootNavigatorKey.currentContext;
+    if (context == null) return;
+    final (title, message) = switch (next.kind) {
+      ImportErrorKind.folder => (
+        AppStrings.importFolderErrorTitle,
+        AppStrings.importFolderErrorMessage,
+      ),
+      ImportErrorKind.files => (
+        AppStrings.importFilesErrorTitle,
+        AppStrings.importFilesErrorMessage,
+      ),
+      ImportErrorKind.accessExpired => (
+        AppStrings.accessExpiredTitle,
+        AppStrings.accessExpiredMessage,
+      ),
+    };
+    unawaited(showMessageDialog(context, title: title, message: message));
+  }
+
   @override
   Widget build(BuildContext context) {
+    ref.listen(importControllerProvider, _onImportState);
     return MaterialApp.router(
       title: AppStrings.appName,
       debugShowCheckedModeBanner: false,

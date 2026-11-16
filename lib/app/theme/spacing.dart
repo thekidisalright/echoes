@@ -12,6 +12,36 @@ abstract final class AppSpacing {
   static const headerIconButton = 44.0;
   static const headerIcon = 20.0;
   static const dialogPadding = 20.0;
+
+  // Escala geral.
+  static const xxs = 2.0;
+  static const xs = 4.0;
+  static const sm = 8.0;
+  static const md = 12.0;
+  static const lg = 16.0;
+  static const xl = 24.0;
+  static const xxl = 32.0;
+
+  /// Margem do topo das telas, abaixo da área segura.
+  static const screenTop = 18.0;
+
+  /// Espaço no fim das listas.
+  static const listBottom = 40.0;
+
+  // Ícones.
+  static const backIcon = 23.0;
+  static const listIcon = 22.0;
+  static const actionIcon = 20.0;
+
+  /// Quadrado do ícone de origem em Gerenciar biblioteca.
+  static const sourceIconBox = 44.0;
+
+  /// Área mínima de toque.
+  static const minTouch = 44.0;
+
+  /// Barras de progresso finas.
+  static const progressBar = 4.0;
+  static const miniProgressBar = 2.0;
 }
 
 abstract final class AppRadii {
