@@ -1,50 +1,67 @@
-# Welcome to your Expo app 👋
+# Echoes
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Player de audiobooks pessoal para Android, focado em arquivos locais (MP3, M4A, M4B).
+Esta branch (`flutter-rewrite`) é a **reconstrução completa do app em Flutter**, substituindo a versão React Native/Expo que vive na branch `main`.
 
-## Get started
+## Status
 
-1. Install dependencies
+🚧 Em reconstrução. Acompanhe o progresso em [`docs/PLAN.md`](docs/PLAN.md).
 
-   ```bash
-   npm install
-   ```
+## O que o Echoes faz
 
-2. Start the app
+- Importa audiobooks a partir de **pastas** (cada pasta é um livro, ou a pasta inteira é um livro) ou de **arquivos soltos**.
+- Lê metadados (título, autor, faixa, duração) e capa — embutida no arquivo ou `cover.jpg` / `folder.jpg` da pasta.
+- Toca em segundo plano com controles na notificação e na tela de bloqueio.
+- Salva o progresso automaticamente e retoma de onde parou.
+- "Continue ouvindo", busca, ordenação, edição de título/autor/capa.
+- Marcadores, lista de capítulos e timer de sono.
 
-   ```bash
-   npx expo start
-   ```
+## Stack
 
-In the output, you'll find options to open the app in a
+| Camada | Tecnologia |
+|---|---|
+| UI | Flutter (Material 3, tema escuro próprio) |
+| Estado | Riverpod |
+| Navegação | go_router |
+| Áudio | just_audio + audio_service + audio_session |
+| Arquivos | Storage Access Framework (docman) |
+| Metadados | metadata_audio (fallback: flutter_taglib) |
+| Banco | drift (SQLite) |
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+Detalhes e justificativas em [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+## Documentação
 
-## Get a fresh project
+| Documento | Conteúdo |
+|---|---|
+| [`CLAUDE.md`](CLAUDE.md) | Regras de trabalho para o Claude Code neste repositório |
+| [`docs/PLAN.md`](docs/PLAN.md) | Plano de execução em fases, com critérios de aceite |
+| [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | Arquitetura, camadas, pacotes e fluxos principais |
+| [`docs/DATA_MODEL.md`](docs/DATA_MODEL.md) | Schema do banco, IDs, regras de persistência |
+| [`docs/FEATURES.md`](docs/FEATURES.md) | Especificação funcional de cada tela e comportamento |
+| [`docs/UI.md`](docs/UI.md) | Identidade visual: cores, tipografia, componentes |
 
-When you're ready, run:
+## Rodando o projeto
+
+Pré-requisitos: Flutter SDK estável, Android SDK, um dispositivo ou emulador Android.
 
 ```bash
-npm run reset-project
+flutter pub get
+dart run build_runner build --delete-conflicting-outputs   # gera código do drift
+flutter run
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+Verificações:
 
-## Learn more
+```bash
+flutter analyze
+flutter test
+```
 
-To learn more about developing your project with Expo, look at the following resources:
+## Versão anterior
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+A versão React Native/Expo continua na branch `main` como referência de comportamento. Para consultar um arquivo antigo sem trocar de branch:
 
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+```bash
+git show main:contexts/LibraryContext.tsx
+```
