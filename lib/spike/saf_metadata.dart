@@ -10,8 +10,8 @@ import 'saf_native.dart';
 /// lido, busca a janela que faltou e tenta de novo.
 Future<SafMetadataResult> readSafMetadata(SafNode file) async {
   final tokenizerSource = SafRangeSource(file);
-  const headSize = 512 * 1024;
-  const tailSize = 256 * 1024;
+  const headSize = 128 * 1024;
+  const tailSize = 8 * 1024;
   await tokenizerSource.ensure(0, headSize);
   if (file.size > headSize) {
     await tokenizerSource.ensure(file.size - tailSize, tailSize);
@@ -25,7 +25,17 @@ Future<SafMetadataResult> readSafMetadata(SafNode file) async {
       FileInfo(path: file.name, mimeType: file.mimeType, size: file.size),
     );
     try {
-      final metadata = await parseFromTokenizer(tokenizer);
+      final metadata = await parseFromTokenizer(
+        tokenizer,
+        options: const ParseOptions(includeChapters: true),
+      );
+      // Alguns parsers (ex.: MP4) engolem a falta de bytes e seguem com
+      // dados incompletos; se houve falta, busca o trecho e tenta de novo.
+      final miss = tokenizer.lastMiss;
+      if (miss != null && attempts < 10) {
+        await tokenizerSource.ensure(miss.$1, _window(miss.$2));
+        continue;
+      }
       return SafMetadataResult(
         metadata: metadata,
         attempts: attempts,
@@ -34,11 +44,12 @@ Future<SafMetadataResult> readSafMetadata(SafNode file) async {
     } on TokenizerException {
       final miss = tokenizer.lastMiss;
       if (miss == null || attempts >= 10) rethrow;
-      final windowSize = miss.$2 > 512 * 1024 ? miss.$2 : 512 * 1024;
-      await tokenizerSource.ensure(miss.$1, windowSize);
+      await tokenizerSource.ensure(miss.$1, _window(miss.$2));
     }
   }
 }
+
+int _window(int length) => length > 256 * 1024 ? length : 256 * 1024;
 
 class SafMetadataResult {
   SafMetadataResult({
@@ -86,8 +97,12 @@ class SafRangeSource {
 }
 
 /// Tokenizer com acesso aleatório sobre os trechos já lidos de um arquivo SAF.
-class SparseTokenizer extends Tokenizer {
-  SparseTokenizer(this._source, this.fileInfo);
+///
+/// Estende [HttpBasedTokenizer] só para receber os pedidos de `prefetchRange`
+/// que os parsers fazem (ex.: o MP4 pede o `moov` inteiro antes de lê-lo).
+class SparseTokenizer extends HttpBasedTokenizer {
+  SparseTokenizer(this._source, FileInfo fileInfo)
+    : super(url: _source.file.uri, fileInfo: fileInfo);
 
   final SafRangeSource _source;
   int _position = 0;
@@ -96,7 +111,11 @@ class SparseTokenizer extends Tokenizer {
   (int, int)? lastMiss;
 
   @override
-  final FileInfo? fileInfo;
+  void close() {}
+
+  @override
+  Future<void> prefetchRange(int start, int end) =>
+      _source.ensure(start, end - start);
 
   @override
   bool get canSeek => true;

@@ -36,7 +36,7 @@ class _SpikeScreenState extends State<SpikeScreen> {
   @override
   void initState() {
     super.initState();
-    unawaited(_loadPerms());
+    unawaited(_autoRun());
   }
 
   @override
@@ -45,7 +45,22 @@ class _SpikeScreenState extends State<SpikeScreen> {
     super.dispose();
   }
 
-  void _add(String line) => setState(() => _log.insert(0, line));
+  /// Roda o teste completo sem toques: lista a pasta salva mais ampla e lê
+  /// os metadados do primeiro M4B e de todos os áudios.
+  Future<void> _autoRun() async {
+    await _loadPerms();
+    if (_perms.isEmpty) return;
+    final root = _perms.reduce((a, b) => a.uri.length <= b.uri.length ? a : b);
+    await _scanUri(root.uri);
+    await _readFirstOf({'m4b', 'm4a'});
+    await _readAll();
+    _add('AUTO-TESTE CONCLUÍDO');
+  }
+
+  void _add(String line) {
+    debugPrint('SPIKE $line');
+    setState(() => _log.insert(0, line));
+  }
 
   Future<void> _run(String label, Future<void> Function() task) async {
     setState(() => _busy = true);
@@ -142,6 +157,9 @@ class _SpikeScreenState extends State<SpikeScreen> {
         '| lidos=${(r.bytesRead / 1024).round()} KB de '
         '${(file.size / 1024).round()} KB',
       );
+      for (final ch in (f.chapters ?? const []).take(5)) {
+        _add('    capítulo: ${ch.title} @ ${ch.start} ms');
+      }
       final pic = c.picture?.firstOrNull;
       if (pic != null) {
         setState(() => _covers.add((file.name, Uint8List.fromList(pic.data))));
