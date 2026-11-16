@@ -13,6 +13,9 @@ import '../../../app/theme/spacing.dart';
 import '../../../app/theme/typography.dart';
 import '../../bookmarks/presentation/bookmark_providers.dart';
 import '../../library/presentation/widgets/book_cover.dart';
+import '../../sleep_timer/domain/sleep_timer_state.dart';
+import '../../sleep_timer/presentation/sleep_timer_providers.dart';
+import '../../sleep_timer/presentation/sleep_timer_sheet.dart';
 import '../data/playback_controller.dart';
 import '../domain/player_state.dart';
 import 'player_providers.dart';
@@ -217,16 +220,25 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen>
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
-                          _BookmarkButton(enabled: state.hasBook),
-                          _ActionButton(
-                            icon: Ionicons.listOutline,
-                            label: AppStrings.chapters,
-                            onPressed: state.hasBook
-                                ? () => context.push(AppRoutes.chapters)
-                                : null,
+                          // Flexíveis: a linha cabe em telas estreitas.
+                          Flexible(
+                            child: _SleepTimerButton(enabled: state.hasBook),
+                          ),
+                          Flexible(
+                            child: _BookmarkButton(enabled: state.hasBook),
+                          ),
+                          Flexible(
+                            child: _ActionButton(
+                              icon: Ionicons.listOutline,
+                              label: AppStrings.chapters,
+                              onPressed: state.hasBook
+                                  ? () => context.push(AppRoutes.chapters)
+                                  : null,
+                            ),
                           ),
                         ],
                       ),
+                      const _CancelSleepTimer(),
                     ],
                   ),
                 ),
@@ -250,6 +262,52 @@ class _ChapterSeekBar extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final position = ref.watch(playerPositionProvider).value ?? Duration.zero;
     return SeekBar(position: position, duration: duration, onSeek: onSeek);
+  }
+}
+
+/// Abre a folha do timer; dourado e com o tempo restante quando ativo.
+class _SleepTimerButton extends ConsumerWidget {
+  const _SleepTimerButton({required this.enabled});
+
+  final bool enabled;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final timer =
+        ref.watch(sleepTimerStateProvider).value ?? const SleepTimerOff();
+    return _ActionButton(
+      icon: Ionicons.moonOutline,
+      label: switch (timer) {
+        SleepTimerOff() => AppStrings.timer,
+        SleepTimerCountdown(:final minutesLeft) => AppStrings.timerRemaining(
+          minutesLeft,
+        ),
+        SleepTimerEndOfChapter() => AppStrings.timerActive,
+      },
+      highlighted: timer.active,
+      onPressed: enabled ? () => showSleepTimerSheet(context) : null,
+    );
+  }
+}
+
+/// "Cancelar temporizador", só com timer ativo.
+class _CancelSleepTimer extends ConsumerWidget {
+  const _CancelSleepTimer();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final active = ref.watch(sleepTimerStateProvider).value?.active ?? false;
+    if (!active) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.only(top: AppSpacing.xs),
+      child: TextButton(
+        onPressed: () => ref.read(sleepTimerServiceProvider).cancel(),
+        child: Text(
+          AppStrings.cancelTimer,
+          style: AppTypography.caption.copyWith(color: AppColors.accent),
+        ),
+      ),
+    );
   }
 }
 
@@ -348,6 +406,8 @@ class _ActionButton extends StatelessWidget {
                 Text(
                   label,
                   style: AppTypography.caption.copyWith(color: color),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),

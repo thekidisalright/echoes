@@ -126,7 +126,7 @@ Seguir `docs/FEATURES.md` e `docs/UI.md` à risca. Ordem:
 
 ## Fase 6 — Timer de sono, marcadores e acabamento
 
-- [ ] `SleepTimerService`: por minutos (com tempo restante exposto) e fim de capítulo; folha inferior; cancelar.
+- [x] `SleepTimerService`: por minutos (com tempo restante exposto) e fim de capítulo; folha inferior; cancelar.
 - [ ] Marcadores no Player (feedback "Salvo") e na tela de capítulos (ir para, remover).
 - [ ] Animações de rota conforme `docs/UI.md` → Movimento.
 - [ ] Acessibilidade: `Semantics` com rótulos em todos os botões de ícone; ação de toque longo anunciada como "Editar audiobook"; áreas de toque ≥ 44.
@@ -201,3 +201,4 @@ Anote aqui toda decisão tomada durante a implementação que mude ou detalhe es
 | 2026-11-16 | 5 | O Player também fecha pelo overscroll no topo do `SingleChildScrollView` (o `GestureDetector` continua valendo quando nada rola) | Com conteúdo mais alto que a tela, o `Scrollable` ganhava o arrasto vertical |
 | 2026-11-16 | 5 | Origem de arquivos soltos aparece em Gerenciar com o título atual do livro (`watchSources`); "Arquivos selecionados" fica como reserva | Escolha do usuário (opção a): as origens de arquivos não se distinguiam. Muda FEATURES §1.2 |
 | 2026-11-16 | 6 | Splash: medir a abertura no build release antes de decidir | Escolha do usuário; o debug (10,7 s) inclui JIT e não é representativo |
+| 2026-11-16 | 6 | `SleepTimerService` usa um `Timer` de relógio (até a troca do minuto exibido ou o disparo), com relógio e fábrica de timer injetáveis; fim do capítulo pausa quando o índice do capítulo muda (paridade: o capítulo seguinte chega a começar); abrir outro livro ou fechar o livro cancela | A regra 5 proíbe timers para esperar o player, não para medir tempo de relógio; testável sem `fake_async` |

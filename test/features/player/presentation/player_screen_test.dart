@@ -6,10 +6,26 @@ import 'package:echoes/features/library/domain/chapter.dart';
 import 'package:echoes/features/player/domain/player_state.dart';
 import 'package:echoes/features/player/presentation/player_providers.dart';
 import 'package:echoes/features/player/presentation/player_screen.dart';
+import 'package:echoes/features/sleep_timer/data/sleep_timer_service.dart';
+import 'package:echoes/features/sleep_timer/presentation/sleep_timer_providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
+
+/// Timer que nunca dispara: o teste só confere o estado exibido.
+class _IdleTimer implements Timer {
+  bool _active = true;
+
+  @override
+  void cancel() => _active = false;
+
+  @override
+  bool get isActive => _active;
+
+  @override
+  int get tick => 0;
+}
 
 void main() {
   final book = Book(
@@ -31,7 +47,17 @@ void main() {
     duration: const Duration(minutes: 30),
   );
 
+  late SleepTimerService timer;
+  late int pauses;
+
   Future<void> openPlayer(WidgetTester tester, Size size) async {
+    pauses = 0;
+    timer = SleepTimerService(
+      player: Stream.value(state),
+      pause: () async => pauses++,
+      createTimer: (_, _) => _IdleTimer(),
+    );
+    addTearDown(timer.dispose);
     tester.view.physicalSize = size;
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
@@ -53,6 +79,7 @@ void main() {
           playerPositionProvider.overrideWith(
             (ref) => Stream.value(Duration.zero),
           ),
+          sleepTimerServiceProvider.overrideWithValue(timer),
         ],
         child: MaterialApp.router(theme: buildAppTheme(), routerConfig: router),
       ),
@@ -111,5 +138,63 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(find.byType(PlayerScreen), findsOneWidget);
+  });
+
+  group('timer de sono', () {
+    const size = Size(800, 1400);
+
+    testWidgets('folha liga o timer por minutos e o botão mostra o resto', (
+      tester,
+    ) async {
+      await openPlayer(tester, size);
+      expect(find.text('Temporizador'), findsOneWidget);
+      expect(find.text('Cancelar temporizador'), findsNothing);
+
+      await tester.tap(find.text('Temporizador'));
+      await tester.pumpAndSettle();
+      expect(find.text('Quando deseja pausar?'), findsOneWidget);
+      for (final label in [
+        '15 minutos',
+        '30 minutos',
+        '45 minutos',
+        '60 minutos',
+        'Ao fim do capítulo',
+        'Cancelar',
+      ]) {
+        expect(find.text(label), findsOneWidget);
+      }
+
+      await tester.tap(find.text('30 minutos'));
+      await tester.pumpAndSettle();
+      expect(find.text('Quando deseja pausar?'), findsNothing);
+      expect(find.text('Timer · 30 min'), findsOneWidget);
+      expect(find.text('Cancelar temporizador'), findsOneWidget);
+
+      await tester.tap(find.text('Cancelar temporizador'));
+      await tester.pumpAndSettle();
+      expect(find.text('Temporizador'), findsOneWidget);
+      expect(find.text('Cancelar temporizador'), findsNothing);
+      expect(pauses, 0);
+    });
+
+    testWidgets('fim do capítulo mostra "Timer ativo"', (tester) async {
+      await openPlayer(tester, size);
+      await tester.tap(find.text('Temporizador'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Ao fim do capítulo'));
+      await tester.pumpAndSettle();
+      expect(find.text('Timer ativo'), findsOneWidget);
+      expect(find.text('Cancelar temporizador'), findsOneWidget);
+    });
+
+    testWidgets('"Cancelar" na folha não liga nada', (tester) async {
+      await openPlayer(tester, size);
+      await tester.tap(find.text('Temporizador'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Cancelar'));
+      await tester.pumpAndSettle();
+      expect(find.text('Temporizador'), findsOneWidget);
+      expect(find.text('Cancelar temporizador'), findsNothing);
+    });
   });
 }

@@ -120,7 +120,9 @@ lib/
       data/bookmark_repository.dart
       presentation/bookmark_providers.dart
     sleep_timer/
-      data/sleep_timer_service.dart
+      domain/sleep_timer_state.dart      → desligado | contagem (tempo restante) | fim do capítulo
+      data/sleep_timer_service.dart      → um Timer até a troca do minuto exibido ou o disparo; observa PlayerState
+      presentation/sleep_timer_providers.dart
       presentation/sleep_timer_sheet.dart
     settings/
       data/settings_repository.dart
