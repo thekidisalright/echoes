@@ -66,6 +66,14 @@ android {
     }
 }
 
+// O profile (criado pelo plugin do Flutter) convive com o release e o debug.
+// applicationIdSuffix no buildType vazaria para os módulos dos plugins.
+androidComponents {
+    onVariants(selector().withBuildType("profile")) { variant ->
+        variant.applicationId.set("dev.alexandre.echoes.profile")
+    }
+}
+
 kotlin {
     compilerOptions {
         jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
