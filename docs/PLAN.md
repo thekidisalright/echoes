@@ -134,15 +134,17 @@ Seguir `docs/FEATURES.md` e `docs/UI.md` à risca. Ordem:
 - [x] Build release assinado (`flutter build apk --release`) instalado e testado.
 
 **Aceite (checklist manual final):**
-- [ ] Importar pasta nos dois modos
-- [ ] Importar arquivos soltos
-- [ ] Reimportar após adicionar e remover arquivos na pasta
-- [ ] Remover origem enquanto um livro dela toca
-- [ ] Editar título/autor/capa e reimportar — edição preservada
-- [ ] Timer de 15 min e timer de fim de capítulo
-- [ ] Criar, usar e remover marcador
-- [ ] Reiniciar o aparelho → biblioteca disponível sem escolher pastas de novo
-- [ ] Revogar a permissão da pasta nas configurações do Android → origem aparece como indisponível
+- [x] Importar pasta nos dois modos
+- [x] Importar arquivos soltos
+- [x] Reimportar após adicionar e remover arquivos na pasta
+- [x] Remover origem enquanto um livro dela toca
+- [x] Editar título/autor/capa e reimportar — edição preservada
+- [x] Timer de 15 min e timer de fim de capítulo
+- [x] Criar, usar e remover marcador
+- [x] Reiniciar o aparelho → biblioteca disponível sem escolher pastas de novo
+- [x] Revogar a permissão da pasta nas configurações do Android → origem aparece como indisponível (o Android não revoga permissão de pasta pelas configurações; testado renomeando a pasta)
+
+✅ aceito pelo usuário em 2026-11-16 (Android 15, Xiaomi, build release assinado). Release: abertura a frio 1,2–2,3 s; importação de 245 arquivos em 13,6 s sem quadros perdidos. Profile com 250 livros: 2,0% de quadros acima de 16 ms. 150 testes passando.
 
 ---
 
