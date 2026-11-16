@@ -53,8 +53,35 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen>
     _drag.value = math.max(0, _drag.value + details.delta.dy);
   }
 
-  void _onDragEnd(DragEndDetails details) {
-    final velocity = details.velocity.pixelsPerSecond.dy;
+  void _onDragEnd(DragEndDetails details) =>
+      _settle(details.velocity.pixelsPerSecond.dy);
+
+  /// Quando o conteúdo rola (título longo, tela pequena), o `Scrollable`
+  /// fica com o arrasto vertical. Aí o Player desce pelo overscroll no topo.
+  bool _onScroll(ScrollNotification notification) {
+    if (notification.depth != 0) return false;
+    if (notification is OverscrollNotification &&
+        notification.dragDetails != null &&
+        notification.overscroll < 0) {
+      _drag.value -= notification.overscroll;
+    } else if (notification is ScrollUpdateNotification &&
+        notification.dragDetails != null &&
+        _drag.value > 0) {
+      // Dedo subindo com o Player já puxado: devolve o Player primeiro.
+      _drag.value = math.max(0, _drag.value - notification.scrollDelta!);
+    } else if (notification is ScrollEndNotification && _drag.value > 0) {
+      _settle(notification.dragDetails?.velocity.pixelsPerSecond.dy ?? 0);
+    }
+    return false;
+  }
+
+  /// Sem o brilho/esticar do Android no topo enquanto o Player é puxado.
+  bool _onOverscrollIndicator(OverscrollIndicatorNotification notification) {
+    if (notification.leading) notification.disallowIndicator();
+    return false;
+  }
+
+  void _settle(double velocity) {
     if (_drag.value > PlayerScreen.dismissDistance ||
         velocity > PlayerScreen.dismissVelocity) {
       // A transição de saída desliza a partir de onde o dedo soltou.
@@ -92,111 +119,117 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen>
         onVerticalDragEnd: _onDragEnd,
         child: Scaffold(
           body: SafeArea(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.screenPadding,
-                vertical: AppSpacing.sm,
-              ),
-              child: Column(
-                children: [
-                  Row(
+            child: NotificationListener<OverscrollIndicatorNotification>(
+              onNotification: _onOverscrollIndicator,
+              child: NotificationListener<ScrollNotification>(
+                onNotification: _onScroll,
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.screenPadding,
+                    vertical: AppSpacing.sm,
+                  ),
+                  child: Column(
                     children: [
-                      IconButton(
-                        tooltip: AppStrings.closePlayer,
-                        icon: const Icon(
-                          Ionicons.chevronDown,
-                          color: AppColors.textSecondary,
-                        ),
-                        onPressed: () => context.pop(),
+                      Row(
+                        children: [
+                          IconButton(
+                            tooltip: AppStrings.closePlayer,
+                            icon: const Icon(
+                              Ionicons.chevronDown,
+                              color: AppColors.textSecondary,
+                            ),
+                            onPressed: () => context.pop(),
+                          ),
+                          Expanded(
+                            child: Text(
+                              (book?.author.isNotEmpty ?? false)
+                                  ? book!.author
+                                  : AppStrings.audiobookFallback,
+                              style: AppTypography.bodySmall,
+                              textAlign: TextAlign.center,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          const SizedBox(
+                            width: AppSpacing.minTouch + AppSpacing.xs,
+                          ),
+                        ],
                       ),
-                      Expanded(
-                        child: Text(
-                          (book?.author.isNotEmpty ?? false)
-                              ? book!.author
-                              : AppStrings.audiobookFallback,
-                          style: AppTypography.bodySmall,
+                      const SizedBox(height: AppSpacing.xl),
+                      SizedBox.square(
+                        dimension: coverSize,
+                        child: BookCover(
+                          path: book?.coverPath,
+                          placeholderIcon: Ionicons.bookOutline,
+                          iconSize: coverSize / 4,
+                          radius: AppRadii.cover,
+                          background: AppColors.coverPlaceholder,
+                        ),
+                      ),
+                      const SizedBox(height: AppSpacing.xl),
+                      Text(
+                        (book?.title.isNotEmpty ?? false)
+                            ? book!.title
+                            : AppStrings.untitled,
+                        style: AppTypography.screenTitle,
+                        textAlign: TextAlign.center,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      if (state.hasBook) ...[
+                        const SizedBox(height: AppSpacing.xs),
+                        Text(
+                          state.chapter!.title,
+                          style: AppTypography.body.copyWith(
+                            color: AppColors.textSecondary,
+                          ),
                           textAlign: TextAlign.center,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
+                        const SizedBox(height: AppSpacing.xs),
+                        Text(
+                          AppStrings.chapterOf(
+                            state.chapterIndex + 1,
+                            state.chapters.length,
+                          ),
+                          style: AppTypography.caption,
+                        ),
+                      ],
+                      const SizedBox(height: AppSpacing.lg),
+                      _ChapterSeekBar(
+                        duration: state.duration,
+                        onSeek: (p) => controller().seek(p),
                       ),
-                      const SizedBox(
-                        width: AppSpacing.minTouch + AppSpacing.xs,
+                      const SizedBox(height: AppSpacing.sm),
+                      PlayerControls(
+                        playing: state.playing,
+                        enabled: state.hasBook,
+                        hasNext: !state.isLastChapter,
+                        onPrevious: () => controller().previousChapter(),
+                        onRewind: () => controller().rewind(),
+                        onTogglePlay: () => controller().togglePlay(),
+                        onForward: () => controller().fastForward(),
+                        onNext: () => controller().nextChapter(),
                       ),
-                    ],
-                  ),
-                  const SizedBox(height: AppSpacing.xl),
-                  SizedBox.square(
-                    dimension: coverSize,
-                    child: BookCover(
-                      path: book?.coverPath,
-                      placeholderIcon: Ionicons.bookOutline,
-                      iconSize: coverSize / 4,
-                      radius: AppRadii.cover,
-                      background: AppColors.coverPlaceholder,
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.xl),
-                  Text(
-                    (book?.title.isNotEmpty ?? false)
-                        ? book!.title
-                        : AppStrings.untitled,
-                    style: AppTypography.screenTitle,
-                    textAlign: TextAlign.center,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  if (state.hasBook) ...[
-                    const SizedBox(height: AppSpacing.xs),
-                    Text(
-                      state.chapter!.title,
-                      style: AppTypography.body.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
-                      textAlign: TextAlign.center,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: AppSpacing.xs),
-                    Text(
-                      AppStrings.chapterOf(
-                        state.chapterIndex + 1,
-                        state.chapters.length,
-                      ),
-                      style: AppTypography.caption,
-                    ),
-                  ],
-                  const SizedBox(height: AppSpacing.lg),
-                  _ChapterSeekBar(
-                    duration: state.duration,
-                    onSeek: (p) => controller().seek(p),
-                  ),
-                  const SizedBox(height: AppSpacing.sm),
-                  PlayerControls(
-                    playing: state.playing,
-                    enabled: state.hasBook,
-                    hasNext: !state.isLastChapter,
-                    onPrevious: () => controller().previousChapter(),
-                    onRewind: () => controller().rewind(),
-                    onTogglePlay: () => controller().togglePlay(),
-                    onForward: () => controller().fastForward(),
-                    onNext: () => controller().nextChapter(),
-                  ),
-                  const SizedBox(height: AppSpacing.xl),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      _BookmarkButton(enabled: state.hasBook),
-                      _ActionButton(
-                        icon: Ionicons.listOutline,
-                        label: AppStrings.chapters,
-                        onPressed: state.hasBook
-                            ? () => context.push(AppRoutes.chapters)
-                            : null,
+                      const SizedBox(height: AppSpacing.xl),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          _BookmarkButton(enabled: state.hasBook),
+                          _ActionButton(
+                            icon: Ionicons.listOutline,
+                            label: AppStrings.chapters,
+                            onPressed: state.hasBook
+                                ? () => context.push(AppRoutes.chapters)
+                                : null,
+                          ),
+                        ],
                       ),
                     ],
                   ),
-                ],
+                ),
               ),
             ),
           ),
