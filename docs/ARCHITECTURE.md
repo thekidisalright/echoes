@@ -34,7 +34,8 @@
 | `material_ui` | Widgets Material | No Flutter 3.50+ o Material saiu do SDK; importar `package:material_ui/material_ui.dart` |
 | `drift` + `drift_flutter` + `drift_dev` + `build_runner` | Banco SQLite | SQL tipado, migrações versionadas, consultas reativas |
 | `path_provider` | Diretório de suporte do app | Onde ficam capas extraídas |
-| `image_picker` | Escolher capa personalizada | Galeria do sistema, sem permissão de armazenamento |
+| `image_picker` | Escolher capa personalizada | Galeria do sistema, sem permissão de armazenamento. Fica atrás de `ImageGateway` (`core/images/`) |
+| `package_info_plus` | Versão do app na seção "Sobre" | Lê o `versionName` instalado; atrás de `AppInfo` (`core/app_info/`) |
 | `ionicons` | Ícones | Mantém exatamente o visual da versão anterior |
 | `crypto` | Hash para nomes de arquivo de capa | Nome estável a partir do ID do livro |
 | `rxdart` | Combinação de streams no player | Já é dependência transitiva do just_audio |
@@ -57,6 +58,9 @@ lib/
       typography.dart            → estilos de texto
       spacing.dart               → espaçamentos e raios
       theme.dart                 → ThemeData
+    widgets/
+      screen_header.dart         → voltar + título das telas secundárias
+      dialogs.dart               → alerta e confirmação no estilo do app
   core/
     database/
       app_database.dart          → definição drift, versão do schema, migrações
@@ -70,6 +74,12 @@ lib/
       metadata_audio_reader.dart → implementação (com o tokenizer esparso sobre readRange)
     files/
       cover_store.dart           → salva/remove capas em <appSupport>/covers/
+    images/
+      image_gateway.dart         → interface: pickImage() (capa personalizada)
+      image_picker_gateway.dart  → implementação com image_picker
+    app_info/
+      app_info.dart              → interface: version()
+      package_app_info.dart      → implementação com package_info_plus
     utils/
       natural_sort.dart          → comparação natural de nomes
       file_names.dart            → cleanTitle, parseTrackNumber, isAudio, isImage, isPreferredCover
@@ -78,9 +88,11 @@ lib/
     library/
       domain/                    → Book, Chapter, LibrarySource, BookSummary, SortOrder
       data/library_repository.dart
+      data/book_editor.dart      → salva/restaura título, autor e capa (CoverStore)
       presentation/
         library_screen.dart
-        widgets/ (book_grid_item, continue_listening_item, search_field, sort_chips, empty_state, book_edit_dialog)
+        open_book.dart           → toque num livro: abre no player ou leva a Gerenciar
+        widgets/ (book_cover, book_grid_item, continue_listening_item, search_field, sort_chips, empty_state, book_edit_dialog)
         library_providers.dart
     import/
       domain/                    → ImportMode, ScannedBook, ImportProgress, ImportResult
@@ -99,14 +111,14 @@ lib/
         progress_saver.dart      → regras de salvamento de progresso
       presentation/
         player_screen.dart
-        widgets/ (mini_player, player_controls, seek_bar, cover_art)
+        widgets/ (mini_player, player_controls, seek_bar)
         player_providers.dart
     chapters/
       presentation/chapters_screen.dart
     bookmarks/
       domain/bookmark.dart
       data/bookmark_repository.dart
-      presentation/ (widgets usados em chapters_screen)
+      presentation/bookmark_providers.dart
     sleep_timer/
       data/sleep_timer_service.dart
       presentation/sleep_timer_sheet.dart

@@ -116,7 +116,7 @@ Seguir `docs/FEATURES.md` e `docs/UI.md` à risca. Ordem:
 - [x] 5.4 Player: capa, textos, SeekBar, controles, linha de ações, gesto de arrastar para fechar.
 - [x] 5.5 Capítulos e marcadores (com rolagem até o capítulo atual).
 - [x] 5.6 Diálogo de edição de livro (capa via `image_picker` + `CoverStore`, restaurar dados originais).
-- [ ] 5.7 Configurações (ordenação + Sobre).
+- [x] 5.7 Configurações (ordenação + Sobre).
 
 **Aceite:** todos os fluxos de `docs/FEATURES.md` §1–§7 executáveis no aparelho; sem textos fora de `strings.dart`; sem cores fora de `colors.dart`.
 
@@ -185,3 +185,13 @@ Anote aqui toda decisão tomada durante a implementação que mude ou detalhe es
 | 2026-11-16 | 4 | `lastPlayedAt` é atualizado ao abrir com `autoplay` e a cada gravação de progresso; abrir sem tocar (início do app) não mexe | A reabertura automática não deve reordenar "Recentes" |
 | 2026-11-16 | 4 | Notificação usa `drawable/ic_launcher_monochrome` como ícone pequeno (mantido no release por `res/raw/keep.xml`); fechar pelo multitarefa salva e encerra o serviço só se estiver pausado | Ícone do próprio app; continuar tocando ao remover do multitarefa é o comportamento esperado de player |
 | 2026-11-16 | 4 | Teste de navegação substitui os providers de lista por streams fixos | Streams do drift não terminam dentro do `FakeAsync` dos testes de widget e o `pumpAndSettle` trava (até o timeout de 10 min) |
+| 2026-11-16 | 5 | Falhas de importação viram alerta no `EchoesApp` (navigator raiz), não na tela de Gerenciar | A importação pode terminar depois de o usuário sair da tela; os resultados ("nada novo" etc.) continuam com quem chamou |
+| 2026-11-16 | 5 | Remover origem: o `ImportController` chama `PlaybackController.close()` antes, se o livro carregado é dela | O MiniPlayer some e o progresso é salvo antes de a origem ser apagada |
+| 2026-11-16 | 5 | Livro com origem indisponível leva a Gerenciar com `ManageLibraryArgs(notice)` na rota | FEATURES §2 pede "uma mensagem para atualizar a pasta" |
+| 2026-11-16 | 5 | Tocar num livro abre **sem tocar** (`autoplay: false`) e mostra o Player | Paridade com o app antigo (`openBook(book, false)` em `BookItem`/`ContinueListeningItem`) |
+| 2026-11-16 | 5 | Botão de Temporizador do Player fica para a Fase 6, junto com o `SleepTimerService`; Marcador e Capítulos já entram na 5.4 | Não exibir botão sem função |
+| 2026-11-16 | 5 | Rota do Player não opaca e arrasto com `Transform` próprio; ao soltar além de 120 px (ou > 900 px/s) faz `pop` e a transição de saída continua do ponto do dedo | A biblioteca aparece por baixo durante o gesto, sem animação extra |
+| 2026-11-16 | 5 | Novo token `AppColors.danger` (`#8C3F35`) para o botão "Remover"; escala de espaçamento (`xs`…`xxl`) e tamanhos de ícone em `AppSpacing` | O UI.md não definia cor destrutiva; nenhum valor solto em widget |
+| 2026-11-16 | 5 | `image_picker` atrás de `ImageGateway` e versão via `package_info_plus` atrás de `AppInfo` (`lib/core/`) | Regra 4 do CLAUDE.md; `package_info_plus` aprovado pelo usuário |
+| 2026-11-16 | 5 | Edição de livro passa por `BookEditor` (data); o `PlaybackController.refreshBook` atualiza título/capa do livro carregado e a notificação sem recarregar o áudio | Widget não fala com `CoverStore`/banco; o Player não fica com dados velhos |
+| 2026-11-16 | 5 | Texto de biblioteca vazia trocado pelo do app antigo ("Toque em Gerenciar biblioteca para adicionar uma pasta ou arquivos.") e o botão leva a Gerenciar; "Tente outro título ou autor." na busca vazia | Textos reais do app antigo em vez de inventados |
