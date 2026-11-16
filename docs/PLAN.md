@@ -131,7 +131,7 @@ Seguir `docs/FEATURES.md` e `docs/UI.md` à risca. Ordem:
 - [x] Animações de rota conforme `docs/UI.md` → Movimento.
 - [x] Acessibilidade: `Semantics` com rótulos em todos os botões de ícone; ação de toque longo anunciada como "Editar audiobook"; áreas de toque ≥ 44.
 - [ ] Revisão de desempenho: biblioteca com 200+ livros rolando sem travar (capas com `cacheWidth`); importação de pasta grande não congela a UI (leitura de metadados fora da thread de UI se necessário).
-- [ ] Build release assinado (`flutter build apk --release`) instalado e testado.
+- [x] Build release assinado (`flutter build apk --release`) instalado e testado.
 
 **Aceite (checklist manual final):**
 - [ ] Importar pasta nos dois modos
@@ -205,3 +205,5 @@ Anote aqui toda decisão tomada durante a implementação que mude ou detalhe es
 | 2026-11-16 | 6 | Player cabe numa tela sem rolar: a capa ocupa o espaço que sobrar (até o tamanho de antes); abaixo de 600 px de altura × escala da fonte, volta a rolar | No aparelho, a linha "Cancelar temporizador" ficava fora da tela |
 | 2026-11-16 | 6 | "Cancelar temporizador" sai do Player e vira "Desligar temporizador" dentro da folha, só com timer ativo | Escolha do usuário; muda FEATURES §3 |
 | 2026-11-16 | 6 | Tela de capítulos com abas "CAPÍTULOS" / "MARCADORES (n)" em vez de duas seções numa lista | Escolha do usuário: com muitos capítulos, os marcadores ficavam no fim de uma lista enorme. Muda FEATURES §5 |
+| 2026-11-16 | 6 | Release assinado por `android/key.properties` (fora do git; sem ele, cai na chave de debug com aviso); debug ganha `applicationIdSuffix = ".debug"` | Debug e release convivem no aparelho; trocar de um para o outro não exige desinstalar e perder a biblioteca |
+| 2026-11-16 | 6 | Importação continua na thread principal, sem isolate | Release medido: 245 arquivos (3 livros) em 13,6 s, sem nenhum "Skipped frames" do processo do app; o tempo é E/S do SAF |
