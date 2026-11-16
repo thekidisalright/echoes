@@ -62,8 +62,9 @@ lib/
       app_database.dart          → definição drift, versão do schema, migrações
       tables.dart                → tabelas
     storage/
-      storage_gateway.dart       → interface: pickDirectory, pickAudioFiles, listTree, openRead, hasPermission, releasePermission
+      storage_gateway.dart       → interface: pickDirectory, pickAudioFiles, listTree, readRange, persistedUris, releasePermission
       saf_storage_gateway.dart   → implementação SAF (docman para seletor/permissões + canal nativo para listTree/readRange)
+    providers.dart               → providers de infraestrutura (banco, storage, metadados, capas)
     metadata/
       metadata_reader.dart       → interface: read(uri) → AudioFileMetadata
       metadata_audio_reader.dart → implementação (com o tokenizer esparso sobre readRange)

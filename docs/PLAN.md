@@ -77,14 +77,14 @@ Objetivo: provar que as três peças de plataforma funcionam juntas **antes** de
 
 ## Fase 3 — Importação
 
-- [ ] Interface `StorageGateway` + implementação SAF definida na Fase 0.
-- [ ] Interface `MetadataReader` + implementação definida na Fase 0.
-- [ ] `LibraryScanner` puro (recebe gateway + reader): agrupamento por pasta, modos `oneBook`/`booksInFolders`, ordenação, regras de título/autor/capa, `skipUris`, stream de `ImportProgress`.
-- [ ] `ImportService`: `importFolder(mode)`, `importFiles()`, `rescan(source)`, `remove(source)`, `refreshAvailability()`.
-- [ ] Providers de importação (estado: ocioso / importando com mensagem / erro tipado).
-- [ ] Testes do scanner com `FakeStorageGateway` + `FakeMetadataReader`: árvore aninhada nos dois modos, ordenação com e sem número, prioridade de capa, arquivo com metadado ilegível, arquivos já existentes em outra origem.
+- [x] Interface `StorageGateway` + implementação SAF definida na Fase 0.
+- [x] Interface `MetadataReader` + implementação definida na Fase 0.
+- [x] `LibraryScanner` puro (recebe gateway + reader): agrupamento por pasta, modos `oneBook`/`booksInFolders`, ordenação, regras de título/autor/capa, `skipUris`, stream de `ImportProgress`.
+- [x] `ImportService`: `importFolder(mode)`, `importFiles()`, `rescan(source)`, `remove(source)`, `refreshAvailability()`.
+- [x] Providers de importação (estado: ocioso / importando com mensagem / erro tipado).
+- [x] Testes do scanner com `FakeStorageGateway` + `FakeMetadataReader`: árvore aninhada nos dois modos, ordenação com e sem número, prioridade de capa, arquivo com metadado ilegível, arquivos já existentes em outra origem.
 
-**Aceite:** testes do scanner passam; a partir de um botão temporário, importar uma pasta real popula o banco corretamente (conferir com o inspetor do drift ou logs).
+**Aceite:** ✅ concluído em 2026-11-16 (Android 15). 31 testes novos de scanner, `ImportService` e URIs SAF (92 no total). No aparelho, pela tela provisória de Gerenciar: `Download/Audiobooks` em "Cada pasta é um livro" → 3 livros, 245 capítulos (todos com duração), 2 capas, em 16,4 s; atualizar a origem: 11,2 s. Banco conferido copiando o `echoes.sqlite` com `run-as`.
 
 ---
 
@@ -171,3 +171,9 @@ Anote aqui toda decisão tomada durante a implementação que mude ou detalhe es
 | 2026-11-16 | 2 | Capas órfãs são limpas por `CoverStore.deleteOrphans(LibraryRepository.coverPathsInUse())`, chamado pelo `ImportService` (Fase 3) depois de salvar ou remover origem | Um único caminho cobre remoção de origem, livros sumidos no reescaneamento e troca de extensão da capa |
 | 2026-11-16 | 2 | `LibraryRepository` ganhou `getSource`, `setSourceAvailability` e `chapterUrisOutside` (para o `skipUris`); `ProgressRepository` fica em `features/player/data/` e ignora livro inexistente em vez de falhar | Necessários para `rescan`, `refreshAvailability` e a regra de duplicatas da Fase 3; o player pode salvar progresso logo após a origem ser removida |
 | 2026-11-16 | 2 | `app_database.g.dart` é versionado | Build e testes funcionam sem rodar o `build_runner`; ele continua sendo regenerado após mudar tabelas |
+| 2026-11-16 | 3 | O URI da pasta escolhida é convertido para o formato de árvore (`treeUriOf`: `…/tree/X/document/X` → `…/tree/X`) antes de virar id da origem | O docman devolve a pasta no formato de documento, mas a permissão persistida fica no formato de árvore; sem a conversão, "Atualizar" achava que a permissão tinha expirado (visto no aparelho) |
+| 2026-11-16 | 3 | Modo "pasta inteira": faixas ordenadas por pasta (ordem natural do caminho) e depois pela regra de faixas; imagens de todas as pastas da árvore valem como capa | O app antigo ordenava só pelo nome do arquivo (intercalava `CD1/01` e `CD2/01`) e descartava as imagens nesse modo |
+| 2026-11-16 | 3 | O `LibraryScanner` não grava capas: devolve uma candidata (imagem da pasta ou capa embutida) e o `ImportService` a grava com o `CoverStore`; capa embutida só é pedida ao leitor enquanto nenhuma foi achada e não há imagem preferida na pasta | Mantém o scanner puro e testável, e evita extrair a capa de cada arquivo |
+| 2026-11-16 | 3 | Progresso da importação por callback (`onProgress`), não por stream; o `ImportController` (Riverpod) o converte em estado | Uma importação por vez, sem assinatura para gerenciar; os testes ficam diretos |
+| 2026-11-16 | 3 | Pasta nova sem áudio novo não é salva e a permissão é liberada; arquivos soltos repetidos não têm a permissão liberada (ela ainda serve à origem antiga) | Não deixar origens vazias nem permissões órfãs, sem quebrar origens existentes |
+| 2026-11-16 | 3 | `StorageGateway` ficou com `pickDirectory`, `pickAudioFiles`, `listTree`, `readRange`, `persistedUris` e `releasePermission` (em vez de `openRead`/`hasPermission`) | O leitor de metadados precisa de leitura por trecho, e a checagem de disponibilidade compara todas as origens com uma única listagem de permissões |
