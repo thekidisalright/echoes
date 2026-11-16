@@ -60,7 +60,7 @@ Reescrever do zero, em Flutter, o **Echoes**, um player pessoal de audiobooks pa
    - removido todo o projeto Expo. Foram mantidos README, CLAUDE.md, docs/ e os ícones `assets/images/icon.png`, `android-icon-*.png` e `splash-icon.png`;
    - rodado `flutter create --org dev.alexandre --project-name echoes --platforms android .`;
    - `.gitignore` trocado pelo padrão do Flutter (`54d4f22`).
-4. **Fase 0.2, spike em `lib/spike/`** (`d04f507` até `c119164`). O que foi testado no aparelho:
+4. **Fase 0.2, spike em `lib/spike/`** (`d04f507` até `3ff39c8`). O que foi testado no aparelho:
    - **Seletor de pasta com permissão persistente:** OK. As permissões sobrevivem à morte do processo e à reinstalação com `-r`.
    - **Listagem recursiva:** primeiro com o docman (28 s, **descartado** por lentidão), depois com o canal nativo (OK).
    - **Metadados de MP3:** OK. Um MP3 deu tags `null`, mas foi confirmado por `adb` que o arquivo não tem ID3v2 e o ID3v1 está vazio.
@@ -68,13 +68,13 @@ Reescrever do zero, em Flutter, o **Echoes**, um player pessoal de audiobooks pa
      - Resultado: *Fire & Blood*, 720 MB, com título, autor, capa, 23 capítulos e duração de 95.087,5 s, em 1,3 s lendo 8 MB.
      - Biblioteca toda: 245 arquivos, 0 falhas, 40 MB lidos, 12 s.
    - **just_audio com `content://` e `initialPosition` de 1:00:** OK. A duração do player bate com a dos metadados.
-5. **Resultados registrados** no PLAN e no ARCHITECTURE (`2cf3c7b`).
-6. **Fase 0 fechada:** `lib/spike/` removido e `main.dart` reduzido a um placeholder (`6170ef5`).
-   - O **código de referência do leitor de metadados** está no commit `c119164`, em `lib/spike/saf_metadata.dart` e `lib/spike/saf_native.dart`. Use `git show c119164:lib/spike/saf_metadata.dart` para reaproveitar na Fase 3.
+5. **Resultados registrados** no PLAN e no ARCHITECTURE (`24005e6`).
+6. **Fase 0 fechada:** `lib/spike/` removido e `main.dart` reduzido a um placeholder (`cfb24bc`).
+   - O **código de referência do leitor de metadados** está no commit `3ff39c8`, em `lib/spike/saf_metadata.dart` e `lib/spike/saf_native.dart`. Use `git show 3ff39c8:lib/spike/saf_metadata.dart` para reaproveitar na Fase 3.
 
 ## 4. Estado atual
 
-- Branch `flutter-rewrite`, HEAD `6170ef5`, working tree limpo.
+- Branch `flutter-rewrite`, HEAD `cfb24bc`, working tree limpo.
 - `flutter analyze` sem issues e `flutter test` passando (só um teste placeholder em `test/widget_test.dart`).
 - `lib/main.dart` é um `MaterialApp` mínimo que mostra "Echoes".
 - **Já existem no projeto:**
@@ -105,7 +105,7 @@ Reescrever do zero, em Flutter, o **Echoes**, um player pessoal de audiobooks pa
       - Pode exigir `flutter_launcher_icons`/`flutter_native_splash`. São pacotes fora da lista do ARCHITECTURE: perguntar antes ou fazer na mão em `android/app/src/main/res`.
 4. Aceite da Fase 1: o app abre no tema escuro com "Echoes" em Cormorant, a navegação entre placeholders funciona, o analyze está limpo e os testes de utils passam.
    - Instalar no aparelho: `flutter build apk --debug` e depois `adb install -r build\app\outputs\flutter-apk\app-debug.apk`. A primeira compilação leva cerca de 7 min.
-5. Fases seguintes: 2 (banco drift), 3 (importação, reaproveitando o `SafChannel` e o `SparseTokenizer` do commit `c119164`), 4 (áudio), 5 (telas), 6 (acabamento).
+5. Fases seguintes: 2 (banco drift), 3 (importação, reaproveitando o `SafChannel` e o `SparseTokenizer` do commit `3ff39c8`), 4 (áudio), 5 (telas), 6 (acabamento).
 
 ## 6. Perguntas em aberto
 
@@ -123,7 +123,7 @@ Reescrever do zero, em Flutter, o **Echoes**, um player pessoal de audiobooks pa
 - `docs/PLAN.md`: fases, checkboxes e Registro de decisões.
 - `docs/ARCHITECTURE.md`, `docs/FEATURES.md`, `docs/UI.md`, `docs/DATA_MODEL.md`.
 - `android/app/src/main/kotlin/dev/alexandre/echoes/SafChannel.kt`, `MainActivity.kt`.
-- Referência do spike: `git show c119164:lib/spike/saf_metadata.dart` (o `SparseTokenizer`) e `git show c119164:lib/spike/saf_native.dart` (a ponte Dart do canal).
+- Referência do spike: `git show 3ff39c8:lib/spike/saf_metadata.dart` (o `SparseTokenizer`) e `git show 3ff39c8:lib/spike/saf_native.dart` (a ponte Dart do canal).
 
 **Comandos**
 ```powershell

@@ -78,7 +78,7 @@ Tom esperado, nível de detalhe e armadilhas conhecidas (cada uma com a forma de
 ### 4. Feche
 
 1. Releia o arquivo e confira os hashes contra `git log`.
-2. Faça o commit seguindo o `CLAUDE.md`: `docs: atualizar handoff da sessão (<resumo do estado>)`, com o rodapé de coautoria exigido pela sessão.
+2. Faça o commit seguindo o `CLAUDE.md`: `docs: atualizar handoff da sessão (<resumo do estado>)`. O usuário é o único autor: **sem** rodapé `Co-Authored-By`.
 3. Diga ao usuário, em poucas linhas, o que o documento cobre e o que depende dele para continuar.
 
 ---
