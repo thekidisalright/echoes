@@ -8,89 +8,189 @@ import '../../../app/strings.dart';
 import '../../../app/theme/colors.dart';
 import '../../../app/theme/spacing.dart';
 import '../../../app/theme/typography.dart';
+import '../../import/presentation/widgets/import_status_banner.dart';
 import '../../player/presentation/player_providers.dart';
+import '../../settings/presentation/settings_providers.dart';
+import '../domain/sort_order.dart';
 import 'library_providers.dart';
+import 'open_book.dart';
+import 'widgets/book_grid_item.dart';
+import 'widgets/continue_listening_item.dart';
+import 'widgets/empty_state.dart';
+import 'widgets/search_field.dart';
+import 'widgets/sort_chips.dart';
 
-/// Tela inicial. Placeholder da Fase 1: cabeçalho e navegação.
-class LibraryScreen extends StatelessWidget {
+/// Tela inicial: cabeçalho, Continue ouvindo, busca e grade.
+class LibraryScreen extends ConsumerWidget {
   const LibraryScreen({super.key});
 
+  /// Colunas da grade conforme a largura (docs/FEATURES.md §2).
+  static int columnsFor(double width) => width > 900
+      ? 5
+      : width > 620
+      ? 4
+      : 2;
+
+  static const _gridSpacing = 14.0;
+  static const _gridRunSpacing = 20.0;
+
   @override
-  Widget build(BuildContext context) {
-    final padding = AppSpacing.screenPaddingFor(
-      MediaQuery.sizeOf(context).width,
+  Widget build(BuildContext context, WidgetRef ref) {
+    final width = MediaQuery.sizeOf(context).width;
+    final padding = AppSpacing.screenPaddingFor(width);
+    final books = ref.watch(libraryBooksProvider).value;
+    final recent = ref.watch(continueListeningProvider).value ?? const [];
+    final query = ref.watch(librarySearchProvider);
+    final sort = ref.watch(librarySortProvider).value ?? SortOrder.recent;
+    final hasBook = ref.watch(
+      playerStateProvider.select((s) => s.value?.hasBook ?? false),
     );
+
+    final columns = columnsFor(width);
+    final itemWidth =
+        (width - padding * 2 - _gridSpacing * (columns - 1)) / columns;
+
     return Scaffold(
       body: SafeArea(
-        child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: padding),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 16),
-              Row(
+        bottom: false,
+        child: CustomScrollView(
+          slivers: [
+            SliverPadding(
+              padding: EdgeInsets.fromLTRB(
+                padding,
+                AppSpacing.screenTop,
+                padding,
+                0,
+              ),
+              sliver: SliverList.list(
                 children: [
-                  const Expanded(
-                    child: Text(
-                      AppStrings.appName,
-                      style: AppTypography.display,
+                  const _Header(),
+                  const SizedBox(height: AppSpacing.xl),
+                  const ImportStatusBanner(),
+                  if (recent.isNotEmpty) ...[
+                    const Text(
+                      AppStrings.continueListening,
+                      style: AppTypography.sectionTitle,
                     ),
+                    const SizedBox(height: AppSpacing.sm),
+                    const _ContinueListening(),
+                    const SizedBox(height: AppSpacing.xxl),
+                  ],
+                  SearchField(
+                    initialValue: query,
+                    onChanged: ref.read(librarySearchProvider.notifier).set,
                   ),
-                  _HeaderButton(
-                    icon: Ionicons.libraryOutline,
-                    label: AppStrings.manageLibrary,
-                    onPressed: () => context.push(AppRoutes.manage),
+                  const SizedBox(height: AppSpacing.xl),
+                  Row(
+                    children: [
+                      const Expanded(
+                        child: Text(
+                          AppStrings.library,
+                          style: AppTypography.sectionTitle,
+                        ),
+                      ),
+                      SortChips(
+                        value: sort,
+                        onChanged: (order) => ref
+                            .read(settingsRepositoryProvider)
+                            .setLibrarySort(order),
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: 10),
-                  _HeaderButton(
-                    icon: Ionicons.settingsOutline,
-                    label: AppStrings.settings,
-                    onPressed: () => context.push(AppRoutes.settings),
-                  ),
+                  const SizedBox(height: AppSpacing.md),
                 ],
               ),
-              const SizedBox(height: 24),
-              const Text(AppStrings.library, style: AppTypography.sectionTitle),
-              const SizedBox(height: 16),
-              // Temporário (Fase 1): acesso ao Player até existir o MiniPlayer.
-              FilledButton(
-                onPressed: () => context.push(AppRoutes.player),
-                child: const Text(AppStrings.openPlayer),
+            ),
+            if (books == null)
+              const SliverToBoxAdapter(child: SizedBox.shrink())
+            else if (books.isEmpty)
+              SliverToBoxAdapter(
+                child: EmptyState(
+                  searching: query.trim().isNotEmpty,
+                  onManage: () => context.push(AppRoutes.manage),
+                ),
+              )
+            else
+              SliverPadding(
+                padding: EdgeInsets.symmetric(horizontal: padding),
+                sliver: SliverGrid.builder(
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: columns,
+                    crossAxisSpacing: _gridSpacing,
+                    mainAxisSpacing: _gridRunSpacing,
+                    childAspectRatio: BookGridItem.aspectRatioFor(itemWidth),
+                  ),
+                  itemCount: books.length,
+                  itemBuilder: (context, index) {
+                    final summary = books[index];
+                    return BookGridItem(
+                      key: ValueKey(summary.book.id),
+                      summary: summary,
+                      onTap: () => openBookAndShowPlayer(context, ref, summary),
+                      // Diálogo de edição: Fase 5.6.
+                      onLongPress: () {},
+                    );
+                  },
+                ),
               ),
-              const Expanded(child: _TemporaryBookList()),
-            ],
-          ),
+            SliverToBoxAdapter(
+              child: SizedBox(
+                height:
+                    MediaQuery.paddingOf(context).bottom +
+                    (hasBook ? AppSpacing.miniPlayerClearance : 0) +
+                    AppSpacing.listBottom,
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
 }
 
-/// PROVISÓRIO (Fase 4): lista simples para abrir e tocar livros no aparelho.
-/// A grade definitiva vem na Fase 5.2.
-class _TemporaryBookList extends ConsumerWidget {
-  const _TemporaryBookList();
+class _ContinueListening extends ConsumerWidget {
+  const _ContinueListening();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final books = ref.watch(libraryBooksProvider).value ?? const [];
-    return ListView(
+    final recent = ref.watch(continueListeningProvider).value ?? const [];
+    final player = ref.watch(playerStateProvider).value;
+    final playingId = (player?.playing ?? false) ? player!.book?.id : null;
+    return Column(
       children: [
-        for (final summary in books)
-          ListTile(
-            title: Text(summary.book.title, maxLines: 1),
-            subtitle: Text(
-              summary.sourceAvailable
-                  ? AppStrings.chapterCount(summary.book.chapterCount)
-                  : AppStrings.sourceUnavailable,
-            ),
-            onTap: () async {
-              await ref
-                  .read(playbackControllerProvider)
-                  .openBook(summary.book.id, autoplay: true);
-              if (context.mounted) await context.push(AppRoutes.player);
-            },
+        for (final summary in recent)
+          ContinueListeningItem(
+            key: ValueKey(summary.book.id),
+            summary: summary,
+            playing: summary.book.id == playingId,
+            onTap: () => openBookAndShowPlayer(context, ref, summary),
           ),
+      ],
+    );
+  }
+}
+
+class _Header extends StatelessWidget {
+  const _Header();
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        const Expanded(
+          child: Text(AppStrings.appName, style: AppTypography.display),
+        ),
+        _HeaderButton(
+          icon: Ionicons.libraryOutline,
+          label: AppStrings.manageLibrary,
+          onPressed: () => context.push(AppRoutes.manage),
+        ),
+        const SizedBox(width: AppSpacing.sm),
+        _HeaderButton(
+          icon: Ionicons.settingsOutline,
+          label: AppStrings.settings,
+          onPressed: () => context.push(AppRoutes.settings),
+        ),
       ],
     );
   }
@@ -112,6 +212,7 @@ class _HeaderButton extends StatelessWidget {
     return Semantics(
       button: true,
       label: label,
+      excludeSemantics: true,
       child: SizedBox.square(
         dimension: AppSpacing.headerIconButton,
         child: OutlinedButton(

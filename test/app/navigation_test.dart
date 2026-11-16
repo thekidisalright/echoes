@@ -1,10 +1,17 @@
+import 'dart:async';
+
 import 'package:echoes/app/app.dart';
+import 'package:echoes/app/router.dart';
 import 'package:echoes/app/strings.dart';
+import 'package:echoes/features/library/domain/sort_order.dart';
 import 'package:echoes/features/library/presentation/library_providers.dart';
+import 'package:echoes/features/library/presentation/library_screen.dart';
 import 'package:echoes/features/player/domain/player_state.dart';
 import 'package:echoes/features/player/presentation/player_providers.dart';
+import 'package:echoes/features/settings/presentation/settings_providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 
 void main() {
   // Os streams do drift não terminam dentro do FakeAsync dos testes de
@@ -14,6 +21,12 @@ void main() {
       ProviderScope(
         overrides: [
           libraryBooksProvider.overrideWith((ref) => Stream.value(const [])),
+          continueListeningProvider.overrideWith(
+            (ref) => Stream.value(const []),
+          ),
+          librarySortProvider.overrideWith(
+            (ref) => Stream.value(SortOrder.recent),
+          ),
           sourcesProvider.overrideWith((ref) => Stream.value(const [])),
           playerStateProvider.overrideWith(
             (ref) => Stream.value(PlayerState.empty),
@@ -35,7 +48,7 @@ void main() {
 
   testWidgets('navega para Gerenciar biblioteca e volta', (tester) async {
     await pumpApp(tester);
-    await tester.tap(find.bySemanticsLabel(AppStrings.manageLibrary));
+    await tester.tap(find.bySemanticsLabel(AppStrings.manageLibrary).first);
     await tester.pumpAndSettle();
     expect(find.text(AppStrings.manageLibrary), findsOneWidget);
 
@@ -53,7 +66,12 @@ void main() {
 
   testWidgets('abre o Player e dele os Capítulos', (tester) async {
     await pumpApp(tester);
-    await tester.tap(find.text(AppStrings.openPlayer));
+    // Sem livro carregado não há MiniPlayer: abre a rota direto.
+    unawaited(
+      GoRouter.of(
+        tester.element(find.byType(LibraryScreen)),
+      ).push(AppRoutes.player),
+    );
     await tester.pumpAndSettle();
     expect(find.byTooltip(AppStrings.closePlayer), findsOneWidget);
 

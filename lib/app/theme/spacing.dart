@@ -32,9 +32,14 @@ abstract final class AppSpacing {
   static const backIcon = 23.0;
   static const listIcon = 22.0;
   static const actionIcon = 20.0;
+  static const statusIcon = 18.0;
+  static const emptyStateIcon = 42.0;
 
   /// Quadrado do ícone de origem em Gerenciar biblioteca.
   static const sourceIconBox = 44.0;
+
+  /// Espaço reservado no fim das listas quando o MiniPlayer aparece.
+  static const miniPlayerClearance = 96.0;
 
   /// Área mínima de toque.
   static const minTouch = 44.0;

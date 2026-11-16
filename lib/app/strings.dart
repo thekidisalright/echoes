@@ -67,9 +67,11 @@ abstract final class AppStrings {
       'A pasta deste livro está indisponível. Atualize a origem para continuar.';
   static const emptyLibraryTitle = 'Nenhum audiobook';
   static const emptyLibraryMessage =
-      'Adicione uma pasta com seus audiobooks para começar.';
-  static const emptyLibraryAction = 'Adicionar pasta';
+      'Toque em Gerenciar biblioteca para adicionar uma pasta ou arquivos.';
   static const noResults = 'Nenhum resultado';
+  static const noResultsMessage = 'Tente outro título ou autor.';
+  static String listenTo(String title) => 'Ouvir $title';
+  static const openBookError = 'Não foi possível abrir este audiobook.';
   static const nowPlaying = 'Tocando agora';
   static const recentlyPlayed = 'Ouvido recentemente';
 
