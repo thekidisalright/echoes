@@ -3,6 +3,19 @@ import 'package:flutter/services.dart';
 
 import 'storage_gateway.dart';
 
+/// URI de árvore (`…/tree/<id>`) a partir de um URI de documento dentro da
+/// árvore (`…/tree/<id>/document/<doc>`).
+///
+/// O docman devolve a pasta escolhida no formato de documento, mas a
+/// permissão persistida fica registrada no formato de árvore; a origem usa o
+/// formato de árvore para as duas coisas baterem.
+String treeUriOf(String uri) {
+  final tree = uri.indexOf('/tree/');
+  final document = uri.indexOf('/document/');
+  if (tree < 0 || document < tree) return uri;
+  return uri.substring(0, document);
+}
+
 /// [StorageGateway] do Android.
 ///
 /// Seletor e permissões persistidas via `docman`; listagem e leitura de
@@ -20,7 +33,7 @@ class SafStorageGateway implements StorageGateway {
   Future<PickedDirectory?> pickDirectory() async {
     final dir = await DocMan.pick.directory();
     if (dir == null) return null;
-    return PickedDirectory(uri: dir.uri, name: dir.name);
+    return PickedDirectory(uri: treeUriOf(dir.uri), name: dir.name);
   }
 
   @override
