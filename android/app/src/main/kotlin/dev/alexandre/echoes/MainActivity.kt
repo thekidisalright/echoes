@@ -1,9 +1,10 @@
 package dev.alexandre.echoes
 
-import io.flutter.embedding.android.FlutterActivity
+import com.ryanheise.audioservice.AudioServiceActivity
 import io.flutter.embedding.engine.FlutterEngine
 
-class MainActivity : FlutterActivity() {
+/** Usa o engine compartilhado do audio_service e registra o canal SAF. */
+class MainActivity : AudioServiceActivity() {
     private var safChannel: SafChannel? = null
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
