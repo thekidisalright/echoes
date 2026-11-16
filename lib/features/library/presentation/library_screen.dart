@@ -1,3 +1,4 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:material_ui/material_ui.dart';
@@ -7,6 +8,8 @@ import '../../../app/strings.dart';
 import '../../../app/theme/colors.dart';
 import '../../../app/theme/spacing.dart';
 import '../../../app/theme/typography.dart';
+import '../../player/presentation/player_providers.dart';
+import 'library_providers.dart';
 
 /// Tela inicial. Placeholder da Fase 1: cabeçalho e navegação.
 class LibraryScreen extends StatelessWidget {
@@ -54,10 +57,41 @@ class LibraryScreen extends StatelessWidget {
                 onPressed: () => context.push(AppRoutes.player),
                 child: const Text(AppStrings.openPlayer),
               ),
+              const Expanded(child: _TemporaryBookList()),
             ],
           ),
         ),
       ),
+    );
+  }
+}
+
+/// PROVISÓRIO (Fase 4): lista simples para abrir e tocar livros no aparelho.
+/// A grade definitiva vem na Fase 5.2.
+class _TemporaryBookList extends ConsumerWidget {
+  const _TemporaryBookList();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final books = ref.watch(libraryBooksProvider).value ?? const [];
+    return ListView(
+      children: [
+        for (final summary in books)
+          ListTile(
+            title: Text(summary.book.title, maxLines: 1),
+            subtitle: Text(
+              summary.sourceAvailable
+                  ? AppStrings.chapterCount(summary.book.chapterCount)
+                  : AppStrings.sourceUnavailable,
+            ),
+            onTap: () async {
+              await ref
+                  .read(playbackControllerProvider)
+                  .openBook(summary.book.id, autoplay: true);
+              if (context.mounted) await context.push(AppRoutes.player);
+            },
+          ),
+      ],
     );
   }
 }

@@ -1,11 +1,30 @@
 import 'package:echoes/app/app.dart';
 import 'package:echoes/app/strings.dart';
+import 'package:echoes/features/library/presentation/library_providers.dart';
+import 'package:echoes/features/player/domain/player_state.dart';
+import 'package:echoes/features/player/presentation/player_providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  // Os streams do drift não terminam dentro do FakeAsync dos testes de
+  // widget (o pumpAndSettle nunca assenta); as listas vêm de streams fixos.
   Future<void> pumpApp(WidgetTester tester) async {
-    await tester.pumpWidget(const ProviderScope(child: EchoesApp()));
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          libraryBooksProvider.overrideWith((ref) => Stream.value(const [])),
+          sourcesProvider.overrideWith((ref) => Stream.value(const [])),
+          playerStateProvider.overrideWith(
+            (ref) => Stream.value(PlayerState.empty),
+          ),
+          playerPositionProvider.overrideWith(
+            (ref) => Stream.value(Duration.zero),
+          ),
+        ],
+        child: const EchoesApp(),
+      ),
+    );
     await tester.pumpAndSettle();
   }
 
