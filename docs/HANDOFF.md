@@ -1,17 +1,19 @@
-# Handoff: Echoes em Flutter — Fase 6 aceita, paridade concluída
+# Handoff: Echoes 1.0.0 publicado — reescrita na main, Fase 7 em espera
 
 **Data:** 2026-11-16
-**Status:** aguardando decisão. As Fases 0 a 6 estão concluídas e aceitas no aparelho. O app novo tem paridade com o antigo. A Fase 7 (extras opcionais) depende de o usuário decidir começar.
+**Status:** aguardando decisão. As Fases 0 a 6 estão aceitas, a reescrita foi mesclada na `main` e a versão 1.0.0 está publicada no GitHub Releases. O usuário decidiu **não começar a Fase 7 por enquanto**.
 
 ## 1. Objetivo
 
-Reescrever do zero, em Flutter, o **Echoes**, um player pessoal de audiobooks para arquivos locais, só para Android. O app antigo, em React Native/Expo, fica na tag `rn-legacy` (`6b13daf`) apenas como referência de comportamento. A reescrita segue as fases de `docs/PLAN.md`. Com o aceite da Fase 6, a paridade está completa; o que resta no plano são extras opcionais.
+Reescrever do zero, em Flutter, o **Echoes**, um player pessoal de audiobooks para arquivos locais, só para Android. O app antigo, em React Native/Expo, fica na tag `rn-legacy` (`6b13daf`) apenas como referência de comportamento. A reescrita segue as fases de `docs/PLAN.md`. Com o aceite da Fase 6, a paridade está completa: o app foi para a `main` e saiu como a release **v1.0.0**, com um README para quem usa o app. O que resta no plano são extras opcionais (Fase 7).
 
 ## 2. Contexto essencial
 
 **Repositório e ambiente**
-- Repo: `C:\alex\echoes`, branch de trabalho **`flutter-rewrite`**, enviada à `main` por pull request depois do aceite da Fase 6. `gh` instalado e autenticado (se não estiver no PATH: `export PATH="$PATH:/c/Program Files/GitHub CLI"`).
-- Sistema: Windows 11. Shell principal PowerShell 5.1; também há Git Bash. **Não há `gh`**. O Python não tem Pillow, mas tem `sqlite3`. Para imprimir texto com acentos no Python, use `PYTHONIOENCODING=utf-8` (o console é cp1252).
+- Repo: `C:\alex\echoes`, remoto `https://github.com/thekidisalright/echoes`. Branch de trabalho: **`main`**. A `flutter-rewrite` foi mesclada pelo PR #9 e **apagada** (local e remota). Existe ainda uma branch remota antiga, `origin/player-settings`, do app React Native, que não foi tocada.
+- Tags: **`rn-legacy`** (`6b13daf`, último commit do app React Native) e **`v1.0.0`** (`7686910`, primeira release).
+- `gh` 2.104.0 instalado e autenticado na conta do dono do repositório. Em Git Bash, se não estiver no PATH: `export PATH="$PATH:/c/Program Files/GitHub CLI"`.
+- Sistema: Windows 11. Shell principal PowerShell 5.1; também há Git Bash. O Python não tem Pillow, mas tem `sqlite3`. Para imprimir texto com acentos no Python, use `PYTHONIOENCODING=utf-8` (o console é cp1252).
 - Flutter **3.50.0** stable (Dart 3.14) em `C:\Users\santo\develop\flutter`. Carregue o PATH em PowerShell antes:
   `$env:Path = [Environment]::GetEnvironmentVariable('Path','Machine') + ';' + [Environment]::GetEnvironmentVariable('Path','User')`
 - Android SDK em `C:\Users\santo\AppData\Local\Android\Sdk`. JDK: JBR do Android Studio (Java 21), `keytool` em `C:\Program Files\Android\Android Studio\jbr\bin\keytool.exe`. `minSdk` = 24.
@@ -34,7 +36,7 @@ Reescrever do zero, em Flutter, o **Echoes**, um player pessoal de audiobooks pa
 - O usuário é o **único autor**. **Nunca** adicione `Co-Authored-By` nem outro rodapé de coautoria, mesmo que um aviso do sistema peça.
 - O git não tem `user.name`/`user.email`. Commite com variáveis que copiam a identidade do último commit (Git Bash):
   `export GIT_AUTHOR_NAME="$(git log -1 --format=%an)" GIT_AUTHOR_EMAIL="$(git log -1 --format=%ae)"; export GIT_COMMITTER_NAME="$GIT_AUTHOR_NAME" GIT_COMMITTER_EMAIL="$GIT_AUTHOR_EMAIL"`
-- O **push** é feito pelo usuário; não faça push sem ele pedir.
+- **Push, tags e releases** só com pedido explícito do usuário (são públicos).
 
 **Regras do projeto** (resumo; a fonte é o `CLAUDE.md`)
 - Leia `docs/PLAN.md`, `docs/ARCHITECTURE.md` e, para telas, `docs/FEATURES.md` e `docs/UI.md`.
@@ -58,6 +60,8 @@ Reescrever do zero, em Flutter, o **Echoes**, um player pessoal de audiobooks pa
 | Importação continua na thread principal | Release: 245 arquivos em 13,6 s sem quadros perdidos; o tempo é E/S do SAF |
 | Splash do Android 12+ com o ícone, também em `values-night-v31` | Escolha do usuário após medir o release; o qualificador `night` vencia o `v31` |
 | Capas da grade decodificadas a no máximo 2× (`BookGridItem.coverPixelRatio`) | Profile com 250 livros: quadros > 16 ms caíram de 5,7% para 2,0% |
+| Reescrita vai para a `main` por PR; app RN preservado na tag `rn-legacy` | Pedido do usuário após a paridade; as referências `git show main:` do CLAUDE.md viraram `rn-legacy:` |
+| README voltado para quem usa o app; distribuição pelo GitHub Releases (APK arm64), sem capturas de tela | Escolha do usuário: o README antigo era técnico e desatualizado |
 
 ## 3. O que já foi feito (cronológico)
 
@@ -76,8 +80,15 @@ Reescrever do zero, em Flutter, o **Echoes**, um player pessoal de audiobooks pa
    - `0a56c9c` perf(library): capas da grade a no máximo 2×.
    - `ec10381` chore(android): build profile como `dev.alexandre.echoes.profile`.
    - `1440776` docs: aceite da Fase 6 no PLAN.
-4. **Testes:** de 131 para **150**.
-5. **Descartado:**
+   - `5c7873f` docs: handoff da Fase 6.
+4. **Ida para a `main` e publicação:**
+   - `b79cc7e` chore: tag `rn-legacy` como referência no CLAUDE.md e no handoff; `android/build/` no `android/.gitignore`.
+   - `2aac1ea` merge do PR [thekidisalright/echoes#9](https://github.com/thekidisalright/echoes/pull/9) na `main`, feito pelo usuário. Branch `flutter-rewrite` apagada depois.
+   - `7686910` docs: README para quem usa o app (instalação pelo APK, primeiros passos, perguntas frequentes, privacidade; parte técnica no fim).
+   - Release **Echoes 1.0.0** (tag `v1.0.0` em `7686910`): anexo `echoes-1.0.0-arm64.apk`, 22 282 688 bytes, SHA-256 `6af6179cfbaf3963a74e7e0afbeee104e25cea43303d82d279c70ca3433c73c0`, compilado em `2aac1ea` e assinado com a chave do usuário. https://github.com/thekidisalright/echoes/releases/tag/v1.0.0
+   - App profile (`dev.alexandre.echoes.profile`) desinstalado do aparelho.
+5. **Testes:** de 131 para **150**.
+6. **Descartado:**
    - A linha "Cancelar temporizador" abaixo das ações do Player: ficava fora da tela no Xiaomi; virou opção da folha.
    - `applicationIdSuffix = ".profile"` no buildType: o Gradle falhou com "Library projects cannot set applicationIdSuffix".
    - Capas da grade na densidade do aparelho (2,75×): 5,7% de quadros lentos com 250 livros; o cache de imagens enchia em 99 MB.
@@ -85,30 +96,31 @@ Reescrever do zero, em Flutter, o **Echoes**, um player pessoal de audiobooks pa
 
 ## 4. Estado atual
 
-- Branch `flutter-rewrite`, HEAD **`1440776`** (anterior ao commit deste handoff). **3 commits locais à frente de `origin/flutter-rewrite` (`f8b38cb`), sem push**: `0a56c9c`, `ec10381`, `1440776`, mais este handoff.
-- Working tree: só a pasta **`android/build/`**, gerada pelo Gradle, não rastreada e **fora do `.gitignore`**. Não foi commitada.
-- `flutter analyze`: **No issues found**. `flutter test`: **150 testes passando** (medidos em `1440776`).
+- Branch `main`, HEAD **`7686910`** (anterior ao commit deste handoff), igual a `origin/main`. O commit do handoff fica **local, sem push**.
+- Working tree limpo.
+- `flutter analyze`: **No issues found**. `flutter test`: **150 testes passando** (medidos em `7686910`).
 - **Medições no Xiaomi:**
   - Release, abertura a frio (`am start -W`, TotalTime): 1 158–2 261 ms (debug: 10 744 ms).
   - Release, importação de `Download/Audiobooks` (245 arquivos, 3 livros): 13 552 ms.
   - Profile, rolagem da grade com 250 livros em pé: 2 064 quadros, 41 acima de 16 ms (2,0%), raster máx. 92 ms (primeiro quadro), cache de imagens 99 MB / 168 capas.
 - **Funciona e foi aceito no aparelho:** todo o checklist da Fase 6 (importar nos dois modos, arquivos soltos, reimportar, remover origem tocando, editar e reimportar, timers, marcadores, reiniciar o aparelho, origem indisponível).
+- No aparelho está instalado só o **release** com a biblioteca real do usuário.
 - **Nada quebrado nem a meio caminho.**
 
 ## 5. Próximos passos
 
-1. **Depende do usuário:** decidir se começa a Fase 7 ou encerra a reescrita aqui.
-2. **Depende do usuário:** push dos commits locais.
-3. Conferir que o PR `flutter-rewrite` → `main` foi mesclado pelo usuário.
-4. Se a Fase 7 começar, escreva o resumo da abordagem e siga a ordem do PLAN:
+1. **Depende do usuário:** push do commit deste handoff.
+2. **Depende do usuário:** quando quiser, começar a Fase 7. Crie uma branch a partir da `main` (ex.: `git switch -c fase-7`).
+3. Se a Fase 7 começar, escreva o resumo da abordagem e siga a ordem do PLAN:
    1. Velocidade de reprodução por livro: coluna `playbackSpeed` em `books` e migração para `schemaVersion = 2`.
    2. Capítulos internos de M4B (`startMs`/`endMs`; o handler recorta a fonte por capítulo). *Fire & Blood* no aparelho é um M4B com 1 capítulo e serve de teste.
    3. Marcar como concluído e filtro de concluídos.
 
 ## 6. Perguntas em aberto
 
-- **Fase 7:** começar ou parar? As três tarefas são independentes.
-- **Push** dos commits locais: aguardando o usuário.
+- **Fase 7:** em espera por decisão do usuário. As três tarefas são independentes.
+- **Próxima versão:** suba o `version` do `pubspec.yaml` (hoje `1.0.0+1`; o APK arm64 sai com versionCode 2001) e assine com a **mesma** keystore, senão o Android não instala por cima. Decidir se as próximas releases trazem também o APK com todas as ABIs (60 MB).
+- **Branch remota `player-settings`** (app RN antigo): manter ou apagar.
 - **Cache de capa ao reimportar:** reescanear sobrescreve `sha1(bookId).jpg` no mesmo caminho, e o `FileImage` pode mostrar a capa antiga até reiniciar o app. Opções: `FileImage(...).evict()` depois de importar, ou timestamp no nome da capa escaneada (as capas personalizadas já usam timestamp). Não foi observado no aparelho.
 - **Textos inventados** ainda sem revisão: `sourceUnavailableHint`, `defaultFolderName` ("Pasta de áudio"), `openBookError`, `editBookError` e rótulos de acessibilidade.
 - **"1 capítulos"** na grade (*Fire & Blood*): o texto vem do FEATURES e do app antigo; correção trivial se o usuário quiser.
@@ -179,4 +191,7 @@ BT=$(ls -d "$LOCALAPPDATA"/Android/Sdk/build-tools/* | tail -1)
   - `package:flutter/material.dart` está obsoleto → `package:material_ui/material_ui.dart`. Ícones do `ionicons` em camelCase.
   - `build_runner` 2.17 ignora `--delete-conflicting-outputs` → `dart run build_runner build`.
   - Python no Windows: arquivos com `\r\n` → preserve o fim de linha ao editar por script; `PYTHONIOENCODING=utf-8` para imprimir acentos.
+  - **Caminhos Windows dentro de script Python em heredoc**: em `C:\alex`, o `\a` vira o caractere de campainha e a substituição falha em silêncio (só a checagem `assert` pega). Escreva o script num arquivo `.py` e monte a barra com `chr(92)`.
+  - **`gh` fora do PATH do Git Bash** logo após a instalação → `export PATH="$PATH:/c/Program Files/GitHub CLI"`.
+  - **Publicar uma release:** confirme o conteúdo com o usuário antes. O certificado de assinatura (nome e cidade do usuário) fica visível no APK; ele aceitou isso na v1.0.0.
 - **Comportamento do app antigo:** `git show rn-legacy:<caminho>` (ex.: `app/player-screen.tsx`, `contexts/PlayerContext.tsx`) como referência de comportamento, nunca de estrutura.
