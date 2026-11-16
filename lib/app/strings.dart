@@ -100,7 +100,7 @@ abstract final class AppStrings {
   static const bookmark = 'Marcador';
   static const bookmarkSaved = 'Salvo';
   static const chapters = 'Capítulos';
-  static const cancelTimer = 'Cancelar temporizador';
+  static const cancelTimer = 'Desligar temporizador';
 
   // 3.1 Timer de sono
   static const sleepTimerTitle = 'Temporizador';

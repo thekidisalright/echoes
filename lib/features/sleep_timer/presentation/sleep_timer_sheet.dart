@@ -15,7 +15,8 @@ Future<void> showSleepTimerSheet(BuildContext context) =>
       builder: (context) => const SleepTimerSheet(),
     );
 
-/// Folha inferior: 15/30/45/60 minutos, fim do capítulo ou cancelar.
+/// Folha inferior: 15/30/45/60 minutos, fim do capítulo, desligar o timer
+/// (só com timer ativo) ou fechar.
 class SleepTimerSheet extends ConsumerWidget {
   const SleepTimerSheet({super.key});
 
@@ -23,6 +24,7 @@ class SleepTimerSheet extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final active = ref.watch(sleepTimerStateProvider).value?.active ?? false;
     void choose(void Function() start) {
       start();
       Navigator.pop(context);
@@ -59,6 +61,13 @@ class SleepTimerSheet extends ConsumerWidget {
               () => ref.read(sleepTimerServiceProvider).startEndOfChapter(),
             ),
           ),
+          if (active)
+            _Option(
+              label: AppStrings.cancelTimer,
+              color: AppColors.accent,
+              onTap: () =>
+                  choose(() => ref.read(sleepTimerServiceProvider).cancel()),
+            ),
           _Option(
             label: AppStrings.cancel,
             color: AppColors.textSecondary,

@@ -78,7 +78,8 @@ Textos entre aspas são os textos de UI exatos (vão para `lib/app/strings.dart`
   - Capítulo anterior: se posição > 3 s, volta ao início do capítulo; senão vai para o anterior; no primeiro capítulo volta ao início **(novo — regra dos 3 s)**.
   - Próximo capítulo: desabilitado no último.
 - **Linha de ações:** Temporizador (`moon-outline`, dourado quando ativo, texto "Timer ativo"), Marcador (feedback "Salvo" por 1,5 s), Capítulos (abre a tela de capítulos).
-- "Cancelar temporizador" aparece abaixo quando há timer ativo.
+- Com timer ativo, a folha do Temporizador ganha "Desligar temporizador" **(novo — antes era uma linha "Cancelar temporizador" abaixo das ações, fora da tela sem rolar)**.
+- O Player cabe numa tela, sem rolagem: a capa encolhe para o espaço que sobrar **(novo)**. Só rola em telas baixas (paisagem, fonte grande).
 - Fim do último capítulo: pausa, mantém o livro carregado no fim **(novo — comportamento explícito)**.
 
 ### 3.1 Timer de sono

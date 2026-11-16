@@ -103,13 +103,7 @@ void main() {
     tester,
   ) async {
     await openPlayer(tester, const Size(800, 1400));
-    expect(
-      tester
-          .state<ScrollableState>(find.byType(Scrollable).first)
-          .position
-          .maxScrollExtent,
-      0,
-    );
+    expect(find.byType(SingleChildScrollView), findsNothing);
     await dragDown(tester);
     expect(find.byType(PlayerScreen), findsNothing);
   });
@@ -148,7 +142,6 @@ void main() {
     ) async {
       await openPlayer(tester, size);
       expect(find.text('Temporizador'), findsOneWidget);
-      expect(find.text('Cancelar temporizador'), findsNothing);
 
       await tester.tap(find.text('Temporizador'));
       await tester.pumpAndSettle();
@@ -164,16 +157,20 @@ void main() {
         expect(find.text(label), findsOneWidget);
       }
 
+      expect(find.text('Desligar temporizador'), findsNothing);
+
       await tester.tap(find.text('30 minutos'));
       await tester.pumpAndSettle();
       expect(find.text('Quando deseja pausar?'), findsNothing);
       expect(find.text('Timer · 30 min'), findsOneWidget);
-      expect(find.text('Cancelar temporizador'), findsOneWidget);
 
-      await tester.tap(find.text('Cancelar temporizador'));
+      // Desligar fica dentro da folha, só com timer ativo.
+      await tester.tap(find.text('Timer · 30 min'));
       await tester.pumpAndSettle();
+      await tester.tap(find.text('Desligar temporizador'));
+      await tester.pumpAndSettle();
+      expect(find.text('Quando deseja pausar?'), findsNothing);
       expect(find.text('Temporizador'), findsOneWidget);
-      expect(find.text('Cancelar temporizador'), findsNothing);
       expect(pauses, 0);
     });
 
@@ -184,7 +181,6 @@ void main() {
       await tester.tap(find.text('Ao fim do capítulo'));
       await tester.pumpAndSettle();
       expect(find.text('Timer ativo'), findsOneWidget);
-      expect(find.text('Cancelar temporizador'), findsOneWidget);
     });
 
     testWidgets('"Cancelar" na folha não liga nada', (tester) async {
@@ -194,7 +190,13 @@ void main() {
       await tester.tap(find.text('Cancelar'));
       await tester.pumpAndSettle();
       expect(find.text('Temporizador'), findsOneWidget);
-      expect(find.text('Cancelar temporizador'), findsNothing);
     });
+  });
+
+  testWidgets('em tela de celular tudo cabe sem rolar', (tester) async {
+    await openPlayer(tester, const Size(393, 760));
+    expect(find.byType(SingleChildScrollView), findsNothing);
+    expect(find.text('Capítulos'), findsOneWidget);
+    expect(tester.takeException(), isNull);
   });
 }
