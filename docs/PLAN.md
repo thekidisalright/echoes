@@ -29,7 +29,7 @@ Objetivo: provar que as três peças de plataforma funcionam juntas **antes** de
 - [x] Commit: `chore: substituir projeto Expo por projeto Flutter`.
 
 ### 0.2 Spike (código descartável em `lib/spike/`, removido no fim da fase)
-- [ ] Adicionar `docman`, `metadata_audio`, `just_audio`.
+- [x] Adicionar `docman`, `metadata_audio`, `just_audio`.
 - [ ] Botão que escolhe uma pasta via SAF com permissão persistente.
 - [ ] Listar recursivamente os `.mp3/.m4a/.m4b` e imagens da pasta.
 - [ ] Ler metadados (título, álbum, artista, faixa, duração, capa embutida) de um `.mp3` e de um `.m4b` **a partir da URI `content://`**.
