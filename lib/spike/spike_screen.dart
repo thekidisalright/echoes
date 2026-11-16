@@ -59,14 +59,17 @@ class _SpikeScreenState extends State<SpikeScreen> {
     }
   }
 
-  Future<void> _loadPerms() => _run('Permissões persistidas', () async {
-        final perms = await DocMan.perms.list(files: false);
-        setState(() => _perms = perms);
-        for (final p in perms) {
-          _add('perm: ${p.uri} read=${p.read}');
-        }
-        if (perms.isEmpty) _add('Nenhuma permissão persistida');
-      });
+  Future<void> _loadPerms() =>
+      _run('Permissões persistidas', _refreshPerms);
+
+  Future<void> _refreshPerms() async {
+    final perms = await DocMan.perms.list(files: false);
+    setState(() => _perms = perms);
+    for (final p in perms) {
+      _add('perm: ${p.uri} read=${p.read}');
+    }
+    if (perms.isEmpty) _add('Nenhuma permissão persistida');
+  }
 
   Future<void> _pickDir() => _run('Escolher pasta', () async {
         final dir = await DocMan.pick.directory();
@@ -75,7 +78,7 @@ class _SpikeScreenState extends State<SpikeScreen> {
           return;
         }
         _add('Pasta: ${dir.name} → ${dir.uri}');
-        await _loadPerms();
+        await _refreshPerms();
         await _scan(dir);
       });
 
@@ -146,8 +149,9 @@ class _SpikeScreenState extends State<SpikeScreen> {
   }
 
   Future<void> _playFirst() => _run('Tocar a partir de 1:00', () async {
-        final file = _audios.firstOrNull;
-        if (file == null) throw StateError('Nenhum áudio listado');
+        // O maior arquivo, para garantir que 1:00 cabe na duração.
+        if (_audios.isEmpty) throw StateError('Nenhum áudio listado');
+        final file = _audios.reduce((a, b) => a.size >= b.size ? a : b);
         final duration = await _player.setAudioSource(
           AudioSource.uri(Uri.parse(file.uri)),
           initialPosition: const Duration(minutes: 1),
