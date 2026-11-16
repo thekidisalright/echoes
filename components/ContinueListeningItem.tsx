@@ -1,4 +1,3 @@
-import { useLibraryContext } from "@/contexts/LibraryContext";
 import { usePlayerContext } from "@/contexts/PlayerContext";
 import { BookType } from "@/types/AppTypes";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
@@ -13,13 +12,14 @@ export default function ContinueListeningItem({
   status: string;
   book: BookType;
 }) {
-  const { setCurrentBook, saveProgress } = usePlayerContext();
-  const { updateBook } = useLibraryContext();
+  const { openBook } = usePlayerContext();
   const router = useRouter();
+  const measuredDuration = book.chapters.reduce((total, chapter) => total + (chapter.duration || 0), 0);
+  const progress = measuredDuration > 0
+    ? book.chapters.reduce((total, chapter, index) => total + (index < book.savedChapterIndex ? chapter.duration || 0 : 0), 0) + (book.savedPosition || 0)
+    : book.savedChapterIndex;
   const handlePress = async () => {
-    await saveProgress();
-    setCurrentBook(book);
-    await updateBook(book.id, { lastPlayedAt: Date.now() });
+    await openBook(book, false);
     router.push("/player-screen");
   };
   return (
@@ -39,15 +39,15 @@ export default function ContinueListeningItem({
         </View>
       )}
       <View className="flex-col flex-1 h-14 justify-between">
-        <Text className="text-white text-sm font-semibold" numberOfLines={1}>
+        <Text className="text-[#d5d4cf] text-sm font-semibold" numberOfLines={1}>
           {book.title}
         </Text>
         <Text className="text-neutral-400 text-sm mb-1" numberOfLines={1}>
-          {book.author ? book.author : "Unknown"}
+          {book.author || "Autor desconhecido"}
         </Text>
         <ProgressBar
-          duration={book.chapters.length || 100}
-          currentTime={book.savedChapterIndex + 1 || 50}
+          duration={measuredDuration || book.chapters.length}
+          currentTime={progress}
         />
       </View>
       <View className="w-14 flex-col items-center">

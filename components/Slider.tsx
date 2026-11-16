@@ -19,18 +19,10 @@ export default function SliderComponent() {
   const [sliderValue, setSliderValue] = useState(0);
 
   useEffect(() => {
-    if (!currentBook) return;
-    if (currentBook.savedPosition !== undefined) {
-      player.seekTo(currentBook.savedPosition);
-      setSliderValue(currentBook.savedPosition);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (!isSliding && status.currentTime) {
+    if (!isSliding && currentBook) {
       setSliderValue(status.currentTime);
     }
-  }, [status.currentTime, isSliding]);
+  }, [status.currentTime, isSliding, currentBook]);
 
   const handleSlidingStart = () => {
     setIsSliding(true);

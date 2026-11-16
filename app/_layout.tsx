@@ -9,6 +9,7 @@ import {
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
+import { StatusBar } from "expo-status-bar";
 import "../global.css";
 
 SplashScreen.preventAutoHideAsync();
@@ -32,12 +33,13 @@ export default function RootLayout() {
   return (
     <LibraryProvider>
       <PlayerProvider>
+        <StatusBar style="light" />
         <Stack>
           <Stack.Screen
             name="index"
             options={{
               headerShown: false,
-              title: "Home",
+              title: "Biblioteca",
               animation: "none",
             }}
           />
@@ -46,21 +48,20 @@ export default function RootLayout() {
             options={{
               animation: "slide_from_bottom",
               headerShown: false,
-              title: "Player",
-              presentation: "formSheet",
-              sheetAllowedDetents: [1],
+              title: "Reproduzindo",
+              presentation: "card",
             }}
           />
           <Stack.Screen
             name="chapters"
             options={{
-              presentation: "formSheet",
-              sheetAllowedDetents: [0.5, 0.8],
-              sheetGrabberVisible: true,
-              title: "Chapters",
-              headerShown: true,
+              presentation: "card",
+              title: "Capítulos",
+              headerShown: false,
             }}
           />
+          <Stack.Screen name="directories" options={{ headerShown: false, animation: "slide_from_right" }} />
+          <Stack.Screen name="settings" options={{ headerShown: false, animation: "slide_from_right" }} />
         </Stack>
       </PlayerProvider>
     </LibraryProvider>
